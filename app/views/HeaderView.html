@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+    <title>Fileamanager</title>
+        <link rel="stylesheet" href="http://localhost\filemanager\public\css\default.css"/>
+</head>
+<body>
+
+<div id="header">
+    <div id="greeting"><?php echo Session::get("user_name")?'Hi, '.Session::get("user_name"):''?></div>
+    <h1>File manager</h1>
+
+    <a href="http://localhost\filemanager\public\home">Description</a>
+    <a href="http://localhost\filemanager\public\aboutus">About Us</a>
+    <?php echo Session::get("loggedin")?"":'<a href="http://localhost\filemanager\public\signup">SignUp</a>'?>
+
+    <?php echo Session::get("loggedin")?"":'<a href="http://localhost\filemanager\public\login">Login</a>'?>
+
+    <?php echo Session::get("loggedin")?'<div id="logged">
+                                            <a href="http://localhost\filemanager\public\filestorage\logout">logout</a>
+                                            <a href="http://localhost\filemanager\public\profile">Profile</a>
+                                            <a href="http://localhost\filemanager\public\filestorage">My files</a>
+                                        </div>':""?>
+
+</div>
+
+<div id="content">

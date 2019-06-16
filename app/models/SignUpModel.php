@@ -47,6 +47,11 @@ class SignUpModel extends Model
 
     }
 
+
+    //1: Nem megfelelő név
+    //2. Nem megfelelő felhasználónév
+    //3. Nem megfelelő emailcím
+    //4. Nem megfelelő a jelszó
     public function isValidUser($name, $email, $username, $password)
     {
         if (strlen($name) < 3) {

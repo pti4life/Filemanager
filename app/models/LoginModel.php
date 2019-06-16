@@ -13,7 +13,6 @@ class Loginmodel extends Model {
     //return value 1: user doesnt exists
     //return value:2: incorrect password
     public function authUser($username, $password) {
-        //TODO:PASSWORD HASHING AND SALTING
         if ($this->checkUser($username)) {
             $stmt=$this->db->prepare("SELECT user_password FROM users WHERE user_uname=:username");
             $stmt->execute(["username"=>$username]);

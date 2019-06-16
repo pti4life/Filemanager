@@ -1,0 +1,19 @@
+Name: <?php echo $GLOBALS["msg"]["user_name"]?><br/>
+Username: <?php echo $GLOBALS["msg"]["user_uname"]?><br/>
+E-mail: <?php echo $GLOBALS["msg"]["user_email"]?><br/>
+<br/><br/><br/>
+Change Password:
+<form action="http://localhost\filemanager\public\profile\changepassword" method="POST">
+    <div class="error"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
+    Old password: <input type="password" name="oldpassword"><br>
+    New password: <input type="password" name="newpassword"><br>
+    <input type="submit">
+</form>
+<br/><br/><br/>
+Change Username:
+<form action="http://localhost\filemanager\public\profile\changeusername" method="POST">
+    <div class="error"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
+    Old password: <input type="password" name="oldpassword"><br>
+    New password: <input type="password" name="newpassword"><br>
+    <input type="submit">
+</form>

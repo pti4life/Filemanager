@@ -1,6 +1,7 @@
 <?php
 
 class User extends Model {
+    //UNUSED
 
     private $name;
     private $username;

@@ -1,0 +1,30 @@
+<div id="profile">
+    <div>
+        <h3>Name: <?php echo $GLOBALS["msg"]["user_name"]?><br/></h3>
+        <h3>Username: <?php echo isset($GLOBALS["msg"]["user_uname"])?$GLOBALS["msg"]["user_uname"]:""?><br/></h3>
+        <h3>E-mail: <?php echo isset($GLOBALS["msg"]["user_email"])?$GLOBALS["msg"]["user_email"]:""?><br/></h3>
+    </div>
+
+    <div class="error"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
+    <div class="defaultform">
+        <form action="http://localhost\filemanager\public\profile\changepassword" method="POST">
+            <h2>Change Password:</h2>
+            Old password: <input type="password" name="oldpassword"><br>
+            New password: <input type="password" name="newpassword"><br>
+            <input type="submit">
+        </form>
+    </div>
+
+    <div class="defaultform">
+        <h2>Change Username:</h2>
+        <form action="http://localhost\filemanager\public\profile\changeusername" method="POST">
+            New username: <input type="text" name="newusername"><br>
+            <input type="submit">
+        </form>
+    </div>
+
+</div>
+
+
+
+

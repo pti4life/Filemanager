@@ -1,0 +1,15 @@
+<div class="defaultform">
+    <h2>Sign Up</h2>
+    <div class="error"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br></div>
+    <form action="http://localhost\filemanager\public\signup\SignUpSubmit" method="POST">
+        <div class="error"><?php echo isset($GLOBALS["msg"]["nameErr"])?$GLOBALS["msg"]["nameErr"]:""?><br/></div>
+        Name: <input type="text" name="name"><br>
+        <div class="error"><?php echo isset($GLOBALS["msg"]["emailErr"])?$GLOBALS["msg"]["emailErr"]:""?><br/></div>
+        E-mail: <input type="text" name="email"><br>
+        <div class="error"><?php echo isset($GLOBALS["msg"]["unameErr"])?$GLOBALS["msg"]["unameErr"]:""?><br/></div>
+        Username: <input type="text" name="username"><br>
+        <div class="error"><?php echo isset($GLOBALS["msg"]["passwordErr"])?$GLOBALS["msg"]["passwordErr"]:""?><br/></div>
+        Password: <input type="password" name="password"><br>
+        <input type="submit">
+    </form>
+</div>

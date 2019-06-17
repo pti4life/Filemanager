@@ -1,6 +1,6 @@
 <?php
 
-class Model extends Database {
+abstract class Model {
 
 
     protected $db;

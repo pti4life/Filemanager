@@ -4,7 +4,7 @@ class FileStorage extends Controller {
     function __construct() {
         Session::init();
 
-        //echo "session: ".!Session::get("loggedin");
+        echo "session: ".Session::get("loggedin");
         if(!Session::get("loggedin")) {
             echo "nincs bejelentkezve";
             Session::destroy();

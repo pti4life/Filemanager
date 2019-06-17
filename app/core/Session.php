@@ -1,10 +1,9 @@
 <?php
 
-class Session {
+ class Session {
 
     public static function init() {
-        if(!isset($_SESSION))
-        {
+        if(!isset($_SESSION)) {
             session_start();
         }
     }
@@ -15,7 +14,7 @@ class Session {
 
     public static function get($key) {
         if(isset($_SESSION[$key])) {
-             $_SESSION[$key];
+             return $_SESSION[$key];
         }
     }
 

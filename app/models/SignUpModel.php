@@ -1,24 +1,25 @@
 <?php
 
-class SignUpModel extends Model
-{
-    private $errorArray = [];
+class SignUpModel extends Model {
 
-
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
 
-    public function SignUp($name, $email, $username, $password)
-    {
-        //return 6 if username exists.
-        //return 5 if email exists.
-        $this->isValidUser($name, $email, $username, $password);
-        if (empty($this->errorArray)) {
-            if (!$this->checkUser($username)) {
-                if (!$this->checkEmail($email)) {
+    //return 1 Invalid name
+    //return 2 Invalid username.
+    //return 3 Invalid email
+    //return 4. Invalid password
+    //return 5 email exists.
+    //return 6 username exists.
+    //return 7 Dadatabase exception
+    //empty errorarray succes signup
+    public function SignUp($name, $email, $username, $password) {
+        $errors=$this->isValidUser($name, $email, $username, $password);
+        if (empty($errors)) {
+            if (!UserOperations::checkUser($username)) {
+                if (!UserOperations::checkEmail($email)) {
                     $password=password_hash($password, PASSWORD_BCRYPT);
                     try {
                         $stmt = $this->db->prepare('INSERT INTO users(user_uname,user_password,user_email,user_name)
@@ -26,25 +27,23 @@ class SignUpModel extends Model
                         $stmt->execute(["username" => $username, "password" => $password, "email"=>$email, "user_name"=>$name]);
                     } catch (PDOException $ex) {
                         echo "PDO EX: ".$ex."<br/>";
-                        array_push($this->errorArray, 7);
-                        return;
+                        array_push($errors, 7);
+                        return $errors;
                     }
 
                 } else {
-                    array_push($this->errorArray, 5);
-                    return $this->errorArray;
+                    array_push($errors, 5);
+                    return $errors;
                 }
 
             } else {
-                array_push($this->errorArray, 6);
-                return $this->errorArray;
+                array_push($errors, 6);
+                return $errors;
             }
 
         } else {
-            return $this->errorArray;
+            return $errors;
         }
-
-
     }
 
 
@@ -52,52 +51,27 @@ class SignUpModel extends Model
     //2. Nem megfelelő felhasználónév
     //3. Nem megfelelő emailcím
     //4. Nem megfelelő a jelszó
-    public function isValidUser($name, $email, $username, $password)
-    {
-        if (strlen($name) < 3) {
-            array_push($this->errorArray, 1);
+    public function isValidUser($name, $email, $username, $password) {
+        $errorArray=[];
+        if (!UserOperations::isValidName($name)) {
+            array_push($errorArray, 1);
         }
 
-        if (strlen($username) < 5) {
-            array_push($this->errorArray, 2);
+        if (!UserOperations::isValidUsername($username)) {
+            array_push($errorArray, 2);
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            array_push($this->errorArray, 3);
+        if (!UserOperations::isValidEmail($email)) {
+            array_push($errorArray, 3);
         }
 
-        if (strlen($password) < 5) {
-            array_push($this->errorArray, 4);
+        if (!UserOperations::isValidPassword($password)) {
+            array_push($errorArray, 4);
         }
+
+        return $errorArray;
 
     }
 
-
-    //TODO: !!!!!!!!!!!!!!!!!CODE DUPLICATION WITH lOGINMODEL.PHP!!!!!!!!!!!!!!!!!!!!
-    private function checkUser($username)
-    {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE user_uname=:username");
-        $stmt->execute(["username" => $username]);
-        $exsist = $stmt->rowCount();
-
-        if ($exsist == 0) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private function checkEmail($email)
-    {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE user_email=:email");
-        $stmt->execute(["email" =>$email ]);
-        $exsist = $stmt->rowCount();
-
-        if ($exsist == 0) {
-            return false;
-        } else {
-            return true;
-        }
-    }
 
 }

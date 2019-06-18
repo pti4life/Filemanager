@@ -18,6 +18,14 @@ a {
     border-radius: 5px 5px;
 }
 
+#filestorage {
+    display: flex;
+}
+#filestorage>table {
+    width: 500px;
+
+}
+
 
 a:hover {
     background-color: grey;
@@ -28,7 +36,12 @@ a:hover {
     float: right;
 }
 
-/*for profile*/
+.profile {
+    display: flex;
+}
+.profile {
+    display: flex;
+}
 
 
 
@@ -47,6 +60,8 @@ body {
     align-content: center;
     background-color: whitesmoke;
 }
+
+
 
 .error {
     color:red;

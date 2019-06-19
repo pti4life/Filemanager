@@ -1,27 +1,35 @@
 <h2>Feltöltött fájlaim</h2>
+<div class="error"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
 <div id="filestorage">
     <table>
         <tr>
-            <th>Fajlnev:</th>
-            <th>Fajlmeret:</th>
-            <th>Modositva:</th>
+            <?php echo('<th><a href="http://localhost\filemanager\public\filestorage\orderby/'.$GLOBALS['msg']['nameorder'].'">Fajlnev</a></th>
+            <th><a href="http://localhost\filemanager\public\filestorage\orderby/'.$GLOBALS['msg']['sizeorder'].'">Fajlmeret</a></th>
+            <th><a href="http://localhost\filemanager\public\filestorage\orderby/'.$GLOBALS['msg']['modifdateorder'].'">Modositva</a></th>');?>
             <th>Muveletek:</th>
             <th>Küldte:</th>
         </tr>
         <?php
-            foreach ($GLOBALS["msg"] as $items) {
+            foreach ($GLOBALS["files"] as $items) {
                 echo('<tr>
                         <th>'.$items["file_name"].'</th>
                         <th>'.$items["file_size"].' bytes</th>
                         <th>'.$items["modif_date"].'</th>
-                        <th>Muveletek</th>
+                        <th>
+                            <a href="http://localhost\filemanager\public\filestorage\downloadfile/'.$items['file'].'">
+                                <img src="http://localhost\filemanager\app\icons\download.png">
+                            </a>
+                            <a href="http://localhost\filemanager\public\filestorage\deletefile/'.$items['file'].'">
+                                <img src="http://localhost\filemanager\app\icons\delete.png">
+                            </a>
+                        </th>
                         <th>Küldte:</th>
                     </tr>');
             }
         ?>
     </table>
     <form action="http://localhost\filemanager\public\filestorage\uploadfile" method="POST" enctype="multipart/form-data">
-        <div class="error"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
+        <div class="error"><?php echo isset($GLOBALS["msg"]["uploadErr"])?$GLOBALS["msg"]["uploadErr"]:""?><br/></div>
         <input type="file" name="file"><br>
         <input type="submit" name="uploadfile">
     </form>

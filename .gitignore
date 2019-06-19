@@ -1,3 +1,4 @@
 .idea/
 app/core/Database.php
+app/files/
 Filemanager

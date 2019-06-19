@@ -8,8 +8,10 @@ class Login extends Controller {
 
         if(Session::get("loggedin")) {
             header("location:..\\filestorage");
+            Session::destroy();
             exit;
         }
+        $this->model=$this->getModel("Loginmodel");
     }
 
     public function index($parameter=[]) {
@@ -19,7 +21,6 @@ class Login extends Controller {
     }
 
     public function loginSubmit() {
-        $this->model=$this->getModel("Loginmodel");
         $username=$_POST["username"];
         $password=$_POST["password"];
         if(!(strlen($username)==0 or strlen($password)==0)) {

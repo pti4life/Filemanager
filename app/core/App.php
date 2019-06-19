@@ -29,6 +29,8 @@ class App {
             }
         }
 
+        $this->parameters=$url? array_values($url):[];
+
         //debug messages
         //echo(var_dump($this->controller));
         //echo("method: ". $this->method."<br/>");

@@ -2,7 +2,6 @@
 
 class Profile extends Controller {
 
-    private $model;
 
     public function __construct() {
         Session::init();
@@ -12,17 +11,16 @@ class Profile extends Controller {
             header("location:..\\errorpage");
             exit;
         }
+        $this->setModel("profilemodel");
     }
 
     public function index($param=[]) {
-        $this->model=$this->getModel("profilemodel");
         $defaultArr=$this->model->selectUser();
         $array=array_merge($defaultArr,$param);
         $this->view("profileView",$array);
     }
 
     public function changeUsername() {
-        $this->model=$this->getModel("profilemodel");
         $msg=$this->model->updateUsername();
         switch ($msg) {
             case 0:
@@ -39,7 +37,6 @@ class Profile extends Controller {
     }
 
     public function changePassword() {
-        $this->model=$this->getModel("profilemodel");
         $msg=$this->model->updatePassword();
         switch ($msg) {
             case 0:

@@ -5,11 +5,14 @@
     text-transform: uppercase;
     font-size: 15px;
 }
+
 h1 {
     padding-bottom:20px ;
 }
 
-a {
+
+
+#header>a,#logged>a {
     margin:5px 5px;
     padding:10px;
     background-color: whitesmoke;
@@ -18,17 +21,52 @@ a {
     border-radius: 5px 5px;
 }
 
-#filestorage {
-    display: flex;
-}
-#filestorage>table {
-    width: 500px;
-
-}
-
-
-a:hover {
+#header>a:hover {
     background-color: grey;
+}
+
+#uploadform {
+    display:flex;
+}
+#uploadform>h2 {
+    margin-right:70px;
+}
+#uploadform>form {
+    margin-top:25px;
+}
+
+#filestorage>table {
+    width: 550px;
+    border-collapse:collapse;
+    margin-right:50px
+}
+
+tr:nth-child(even) {
+    background-color:lightcyan;
+    border-radius:100px;
+}
+tr {
+    border-bottom: 2px solid black;
+}
+
+
+td,th {
+    text-align: center;
+    padding: 7px
+}
+
+
+
+th>a:link {
+    text-decoration:none;
+    color: black;
+}
+th>a:visited {
+    color: black;
+    text-decoration:none;
+}
+th>a:hover {
+    color:grey;
 }
 
 #greeting {
@@ -49,10 +87,11 @@ a:hover {
 #logged {
     float: right;
     display:inline;
+
 }
 
 #content {
-    padding: 100px;
+    padding: 65px;
 }
 
 
@@ -78,4 +117,13 @@ body {
     padding-left: 10px;
     border: 1px solid black;
     width: 300px;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
 }

@@ -1,7 +1,5 @@
 <?php
 class Login extends Controller {
-    private $model;
-
 
     public function __construct() {
         Session::init();
@@ -11,7 +9,7 @@ class Login extends Controller {
             Session::destroy();
             exit;
         }
-        $this->model=$this->getModel("Loginmodel");
+        $this->setModel("Loginmodel");
     }
 
     public function index($parameter=[]) {

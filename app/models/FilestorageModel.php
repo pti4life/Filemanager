@@ -17,6 +17,7 @@ class FilestorageModel extends Model {
             $stmt->execute(["filename" => $filename,"filesize"=>$filesize,"filetype"=>$type ,"userid"=>$userid,"senderid"=>$senderid]);
             $this->upload($filename,$path);
         } catch (PDOException $ex) {
+            echo $ex;
             return 1;
         }
 
@@ -31,7 +32,12 @@ class FilestorageModel extends Model {
         }
         $id=$this->db->lastInsertId();
         $array=explode(".",$filename);
-        $filename=$id.".".end($array);
+        if (count($array)==1) {
+            $filename=$id;
+        } else {
+            $filename=$id.".".end($array);
+        }
+
         $newpath=$newpath."/".$filename;
         move_uploaded_file($path,$newpath);
     }
@@ -50,8 +56,19 @@ class FilestorageModel extends Model {
         return $select;
     }
 
+    public function rowCount() {
+        $username=Session::get("user_name");
+        $stmt = $this->db->prepare("select *
+                                                from users inner join files on users.user_id=files.user_id
+                                                where user_uname=:username");
+        $stmt->execute(["username"=>$username]);
+        $count=$stmt->rowCount();
+        return $count;
+    }
+
     //return 1 show errorpage
     public function downloadFile($id) {
+        //echo "id: ".$id;
         $username=Session::get("user_name");
         $stmt = $this->db->prepare("select file_name,file_type 
                                                 from users inner join files on users.user_id=files.user_id
@@ -61,6 +78,7 @@ class FilestorageModel extends Model {
         $exsist = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!empty($exsist)) {
             $file="../app/files/".$username."/".$id;
+            //echo "file: ".$file;
             if (!file_exists($file)) {
                 return 2;
             }

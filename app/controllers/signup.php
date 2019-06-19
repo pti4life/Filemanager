@@ -2,23 +2,18 @@
 
 class SignUp extends Controller {
 
-    private $model;
 
     function __construct() {
 
+        $this->setModel("signupmodel");
     }
 
 
     public function index($errors=[]) {
-        echo "index errors: ";
-        print_r($errors);
-
         $this->view("signupview",$errors);
     }
 
-    public function SignUpSubmit() {
-        echo "Belépett signupsubmit!";
-        $this->model=$this->getModel("SignUpModel");
+    public function signup() {
         $username=$_POST["username"];
         $password=$_POST["password"];
         $email=$_POST["email"];
@@ -54,19 +49,13 @@ class SignUp extends Controller {
                             $errorArray["message"]="Ismeretlen hiba!";
                             break;
                     }
-                    echo "ERROR TÖMB ELEMEI: ";
-                    print_r($errorArray);
-                    echo "<br/>";
                 }
                 call_user_func_array(["signup","index"],array($errorArray));
             }
 
         } else {
-            echo "Not setted a form!<br/>";
             call_user_func_array(["signup","index"],[["message"=>"Minden mezőt kötelező kitölteni!"]]);
         }
-
-
 
     }
 

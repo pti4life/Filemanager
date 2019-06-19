@@ -72,9 +72,9 @@ class UserOperations  {
         self::initializer();
         $stmt=self::$db->prepare("SELECT user_password FROM users WHERE user_uname=:username");
         $stmt->execute(["username"=>$username]);
-        $select=$stmt->fetch();
+        $select=$stmt->fetch(PDO::FETCH_ASSOC);
         if ($select) {
-            if (password_verify($password,$select[0])) {
+            if (password_verify($password,$select["user_password"])) {
                 return 0;
             } else {
                 return 2;

@@ -1,6 +1,8 @@
 <?php
 $GLOBALS["files"]=[];
 class FileStorage extends Controller {
+
+    private $pagenum;
     function __construct() {
         Session::init();
 
@@ -8,33 +10,32 @@ class FileStorage extends Controller {
         if(!Session::get("loggedin")) {
             echo "nincs bejelentkezve";
             Session::destroy();
-            header("location:..\public\\errorpage");
+            header("location:..\\errorpage");
             exit;
         }
+        $this->setModel("filestoragemodel");
+        $this->pagenum=$this->model->rowCount();
+        //TODO:idea: save clicked order in listfiles
+        // add default in index method
 
     }
 
     public function index($param=[]) {
-        $model=$this->getModel("filestoragemodel");
-        $GLOBALS["files"]=$model->selectFiles();
-//        if (isset($param[0]) && isset($param[1])) {
-//            $param[0]=str_replace("_"," ",$param[0]);
-//            $files=$model->selectFiles($param[0],$param[1]);
-//        } else if (isset($param[0])) {
-//            $files=$model->selectFiles($param[0]);
-//        }
-        //$msg_and_files=array_merge($files,$param);
+        $GLOBALS["files"]=$this->model->selectFiles();
         $orders=["nameorder"=>"file_name/DESC","sizeorder"=>"file_size/ASC","modifdateorder"=>"modif_date/DESC"];
         var_dump($param);
-        $merged=array_merge($orders,$param);
-        echo "msg and files: ";
+
+        //array_push($param,"pagenum"=>$pagenum);
+        $merged=array_merge($param,$orders);
+        $merged["pagenum"]=$this->pagenum;
         print_r($merged);
-        echo "<br/>";
         $this->view("filestorageview",$merged);
+
+
 
     }
 
-    public function logOut() {
+    public function logout() {
         Session::destroy();
         header("location:..\login");
         exit;
@@ -42,8 +43,7 @@ class FileStorage extends Controller {
 
 
     public function uploadFile() {
-        $model=$this->getModel("filestoragemodel");
-        if (empty($_POST["uploadfile"])) {
+        if (!isset($_POST["uploadfile"])) {
             call_user_func_array(["errorpage","index"],[["message"=>"Az oldal nem található!"]]);
             return;
         }
@@ -57,10 +57,8 @@ class FileStorage extends Controller {
         $path=$_FILES["file"]["tmp_name"];
         $size=$_FILES["file"]["size"];
         $error=$_FILES["file"]["error"];
-        //echo "error: ".$error;
-
         if ($error==0 ) {
-            $uploadErr=$model->insertFile($name,$type,$path,$size);
+            $uploadErr=$this->model->insertFile($name,$type,$path,$size);
             switch ($uploadErr) {
                 case 0:
                     call_user_func_array(["filestorage","index"],[["uploadErr"=>"Sikeres feltöltés!"]]);
@@ -76,43 +74,61 @@ class FileStorage extends Controller {
             return;
         }
 
-        //echo "NAME: ".$name."<br/>";
-        //echo "type: ".$type."<br/>";
-        //echo "path: ".$path."<br/>";
-        //echo "size: ".$size."<br/>";
+        echo "NAME: ".$name."<br/>";
+        echo "type: ".$type."<br/>";
+        echo "path: ".$path."<br/>";
+        echo "size: ".$size."<br/>";
     }
 
-    public function downloadFile($param) {
-        $model=$this->getModel("filestoragemodel");
-        $downErr=$model->downloadFile($param);
+    public function downloadFile($param=[]) {
+        if (empty($param)) {
+            header("location: \\filemanager\public\\errorpage");
+            exit();
+        }
+        $downErr=$this->model->downloadFile($param);
         switch ($downErr) {
             case 1:
                 call_user_func_array(["filestorage","index"],[["message"=>"Sikertelen letöltés!"]]);
                 break;
             case 2:
-                call_user_func_array(["filestorage","index"],["message"=>"A fájl nem található!"]);
+                call_user_func_array(["filestorage","index"],[["message"=>"A fájl nem található!"]]);
                 break;
         }
     }
 
     public function deleteFile($param) {
-        $model=$this->getModel("filestoragemodel");
-        $errmsg=$model->deleteFile($param);
+        $errmsg=$this->model->deleteFile($param);
         echo "errmsg: ".$errmsg;
         switch ($errmsg) {
             case 0:
                 call_user_func_array(["filestorage","index"],[["message"=>"Sikeres törlés!"]]);
                 break;
             case 1:
-                call_user_func_array(["filestorage","index"],[["message"=>"Sikertelen törlés!"]]);
+                call_user_func_array(["errorpage","index"],[["message"=>"Az oldal nem található"]]);
                 break;
         }
     }
 
-    public function orderby($column,$order) {
+    public function listfiles($column="", $order="") {
         //echo "COL: ".$column."<br/>";
         //echo "ORDER: ".$order."<br/>";
         $orders=["nameorder"=>"file_name/DESC","sizeorder"=>"file_size/ASC","modifdateorder"=>"modif_date/DESC"];
+        //validation
+        $counter=0;
+        foreach ($orders as $item) {
+            if ((strcmp($column,explode("/",$item)[0])==0)) {
+                //echo "COL: ".$column." item: ".explode("/",$item)[0]."<br/>";
+                $counter++;
+            }
+        }
+        //echo "strcmp asc: ".strcmp($order,"ASC")."<br/>";
+        //echo "strcmp desc".strcmp($order,"DESC")."<br/>";
+        if ($counter!=1 or (strcmp($order,"ASC")!=0 and strcmp($order,"DESC")!=0 )) {
+            echo "asdasd";
+            header("location: \\filemanager\public\\errorpage");
+            exit();
+        }
+
         foreach ($orders as &$item) {
             $exploded=explode("/",$item);
             if (strcmp($column,$exploded[0])==0) {
@@ -126,9 +142,10 @@ class FileStorage extends Controller {
 
             }
         }
-        $model=$this->getModel("filestoragemodel");
-        $GLOBALS["files"]=$model->selectFiles($column." ".$order);
-        $this->view("filestorageview",$orders);
+        $GLOBALS["files"]=$this->model->selectFiles($column." ".$order);
+        $msg=$orders;
+        $msg["pagenum"]=$this->pagenum;
+        $this->view("filestorageview",$msg);
     }
 
 

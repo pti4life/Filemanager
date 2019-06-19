@@ -4,8 +4,9 @@ $msg=[];
 
 abstract class Controller {
 
-    protected function view($name,$param=[]) {
+    protected $model;
 
+    protected function view($name,$param=[]) {
         $GLOBALS["msg"]=$param;
         //echo "GLOBAL MSG: ";
         //print_r($GLOBALS["msg"]);
@@ -16,9 +17,9 @@ abstract class Controller {
         autoload_views("footerview");
     }
 
-    protected function getModel($name) {
-        return new $name();
 
+    protected function setModel($name) {
+        $this->model=new $name();
     }
 
 

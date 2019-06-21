@@ -35,10 +35,38 @@ h1 {
     margin-top:25px;
 }
 
+#filestorage {
+    align-content:center;
+}
+
 #filestorage>table {
     width: 550px;
     border-collapse:collapse;
     margin-right:50px
+}
+
+#filestorage>a {
+    padding:1px;
+}
+
+#upload-container {
+    display:flex;
+
+}
+#upload-container>div {
+    margin-right:50px;
+
+}
+.storageerror {
+    color:red;
+    width: 550px;
+    text-align: center;
+    font-size: larger;
+}
+
+#pagnumber-container {
+    width:550px;
+    text-align:center;
 }
 
 tr:nth-child(even) {
@@ -92,6 +120,11 @@ th>a:hover {
 
 #content {
     padding: 65px;
+    align-content: center;
+}
+
+#editorview {
+    margin: 10px;
 }
 
 

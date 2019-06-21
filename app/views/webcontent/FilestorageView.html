@@ -1,25 +1,38 @@
 <div id="filestorage">
-    <div id="uploadform">
-        <h2>Feltöltött fájlaim</h2>
-        <div class="error"><?php echo isset($GLOBALS["msg"]["uploadErr"])?$GLOBALS["msg"]["uploadErr"]:""?></div>
-        <form action="http://localhost\filemanager\public\filestorage\uploadfile" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file">
-            <input type="submit" name="uploadfile">
-        </form>
+    <div></div>
+    <h2>Fájlkezelő</h2>
+    <div class="storageerror"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
+    <div id="upload-container">
+        <div>
+            <h3>Keresés:</h3>
+            <form action="http://localhost\filemanager\public\filestorage\search\file_name\ASC\0" method="POST">
+                <input type="text" name="word" placeholder="pl.:orarend">
+                <input type="submit" name="search">
+            </form>
+        </div>
+        <div>
+            <h3>Feltöltés</h3>
+            <form action="http://localhost\filemanager\public\filestorage\uploadfile" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <input type="submit" name="uploadfile">
+            </form>
+        </div>
+
     </div>
-    <div class="error"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
+
     <table>
         <tr>
-            <?php echo('<th><a href="http://localhost\filemanager\public\filestorage\listfiles/'.$GLOBALS['msg']['nameorder'].'">Fajlnev</a></th>
-            <th><a href="http://localhost\filemanager\public\filestorage\listfiles/'.$GLOBALS['msg']['sizeorder'].'">Fajlmeret</a></th>
-            <th><a href="http://localhost\filemanager\public\filestorage\listfiles/'.$GLOBALS['msg']['modifdateorder'].'">Modositva</a></th>');?>
-            <th>Muveletek:</th>
-            <th>Küldte:</th>
+            <?php echo('
+                <th><a href="http://localhost\filemanager\public\filestorage\search/file_name/'.$GLOBALS['msg']['sort'].$GLOBALS['msg']['word'].'">Fajlnev</a></th>
+                <th><a href="http://localhost\filemanager\public\filestorage\search/file_size/'.$GLOBALS['msg']['sort'].$GLOBALS['msg']['word'].'">Fajlmeret</a></th>
+                <th><a href="http://localhost\filemanager\public\filestorage\search/modif_date/'.$GLOBALS['msg']['sort'].$GLOBALS['msg']['word'].'">Modositva</a></th>');?>
+                <th>Muveletek:</th>
+                <th>Küldte:</th>
         </tr>
         <?php
             foreach ($GLOBALS["files"] as $items) {
-                echo('<tr>
-                        <td>'.$items["file_name"].'</td>
+                echo('<tr>');
+                    echo('<td>'.$items["file_name"].'</td>
                         <td>'.$items["file_size"].' bytes</td>
                         <td>'.$items["modif_date"].'</td>
                         <td>
@@ -28,20 +41,25 @@
                             </a>
                             <a href="http://localhost\filemanager\public\filestorage\deletefile/'.$items['file'].'">
                                 <img src="http://localhost\filemanager\app\icons\delete.png">
-                            </a>
-                        </td>
-                        <td>Küldte:</td>
-                    </tr>
-                ');
+                            </a>');
+                            echo(strcmp($items["file_type"],'text/plain')==0?'<a href="http://localhost\filemanager\public\editor\edit/'.$items['file'].'">
+                            <img src="http://localhost\filemanager\app\icons\edit.png">
+                        </a>':"");
+
+                        echo('</td>  <td>Küldte:</td>');
+                echo('</tr>');
 
             }
         ?>
     </table>
-    <?php
-        for ($i=1; $i<$GLOBALS["msg"]["pagenum"]; $i++) {
-            echo('<a href="http://localhost\filemanager\public\filestorage\listfiles/"></a>');
+    <div id="pagnumber-container">
+        <?php
+        for ($i=1; $i<$GLOBALS["msg"]["pagenum"];$i++) {
+            echo('<a href="http://localhost\filemanager\public\filestorage\search/'.$GLOBALS['msg']['clickedorder'].($i-1).$GLOBALS['msg']['word'].'">'.$i.'</a>');
         }
-    ?>
+        ?>
+    </div>
+
 
 
 </div>

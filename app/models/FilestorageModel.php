@@ -5,11 +5,15 @@ class FilestorageModel extends Model {
         parent::__construct();
     }
 
+    private $LIMIT;
+
 
 
     public function insertFile($filename=null,$type,$path,$filesize=null,$senderid=null) {
+        if (preg_match('/[%?^#&!~ˇ˘°˛˙´˙`˛°˘]/',$filename)) {
+            return 2;
+        }
 
-        echo "INSERTING...<br/>";
         $userid=$this->getId();
         try {
             $stmt = $this->db->prepare('INSERT INTO files(file_name,file_size,file_type,user_id,sender_id)
@@ -42,28 +46,43 @@ class FilestorageModel extends Model {
         move_uploaded_file($path,$newpath);
     }
 
-    public function selectFiles($orderby="modif_date ASC",$offset=0) {
+    public function file_list($orderby="modif_date ASC", $pagenum=0,$word) {
+        echo "WORD in file_list:".$word."<br/>";
+        //NOT NUMERIC VALUE
+        $offset=$pagenum*$this->LIMIT;
+        $word="%".strtolower($word)."%";
         $username=Session::get("user_name");
-        echo $username;
-        $stmt = $this->db->prepare("select CONCAT(file_id,'.',SUBSTRING_INDEX(file_name, '.', -1)) AS file,file_name,file_size,modif_date, sender_id 
+        $stmt = $this->db->prepare("select CONCAT(file_id,'.',SUBSTRING_INDEX(file_name, '.', -1)) AS file,file_name,file_size,modif_date, sender_id,file_type 
                                                 from users inner join files on users.user_id=files.user_id
-                                                where user_uname=:username
-                                                ORDER BY ".$orderby." LIMIT 10 OFFSET ".$offset);
+                                                where user_uname=:username and LOWER(file_name) like :fname
+                                                ORDER BY ".$orderby." LIMIT ".$this->LIMIT." OFFSET ".$offset);
 
-        $stmt->execute(["username"=>$username]);
+        $stmt->execute(["username"=>$username,"fname"=>$word]);
         $select = $stmt->fetchAll(PDO::FETCH_ASSOC);
         //print_r($select);
         return $select;
     }
 
-    public function rowCount() {
+    public function calculate_pages($word="") {
+        $word="%".strtolower($word)."%";
         $username=Session::get("user_name");
         $stmt = $this->db->prepare("select *
                                                 from users inner join files on users.user_id=files.user_id
-                                                where user_uname=:username");
-        $stmt->execute(["username"=>$username]);
+                                                where user_uname=:username and LOWER(file_name) like :fname");
+        $stmt->execute(["username"=>$username,"fname"=>$word]);
         $count=$stmt->rowCount();
-        return $count;
+        return $this->pages_number($this->LIMIT,$count);
+
+
+    }
+
+
+    private function pages_number($limit,$count) {
+        if (($count/$limit)!=0) {
+            return ($count/$limit)+1;
+        } else {
+            return $count/$limit;
+        }
     }
 
     //return 1 show errorpage
@@ -108,6 +127,7 @@ class FilestorageModel extends Model {
         $res=$stmt->rowCount();
         echo "res: ".$res."<br/>";
         if ($res==1) {
+            //TODO:WARNING MESSAGE IF DOESNT EXISTS
             unlink("../app/files/".$username."/".$id);
             if ($this->isDirEmpty("../app/files/".$username."/")) {
                 rmdir("../app/files/".$username."/");
@@ -132,6 +152,10 @@ class FilestorageModel extends Model {
         $userid = $stmt->fetch(PDO::FETCH_ASSOC);
         return $userid["user_id"];
 
+    }
+
+    public function setLimit($limit) {
+        $this->LIMIT=$limit;
     }
 
 

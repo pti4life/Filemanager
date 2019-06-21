@@ -2,7 +2,9 @@
 $GLOBALS["files"]=[];
 class FileStorage extends Controller {
 
-    private $pagenum;
+    private $LIMIT=3;
+    private $SORTING="ASC/0";
+
     function __construct() {
         Session::init();
 
@@ -14,22 +16,13 @@ class FileStorage extends Controller {
             exit;
         }
         $this->setModel("filestoragemodel");
-        $this->pagenum=$this->model->rowCount();
-        //TODO:idea: save clicked order in listfiles
-        // add default in index method
-
+        $this->model->setLimit($this->LIMIT);
     }
 
     public function index($param=[]) {
-        $GLOBALS["files"]=$this->model->selectFiles();
-        $orders=["nameorder"=>"file_name/DESC","sizeorder"=>"file_size/ASC","modifdateorder"=>"modif_date/DESC"];
-        var_dump($param);
-
-        //array_push($param,"pagenum"=>$pagenum);
-        $merged=array_merge($param,$orders);
-        $merged["pagenum"]=$this->pagenum;
-        print_r($merged);
-        $this->view("filestorageview",$merged);
+        $GLOBALS["files"]=$this->model->file_list("file_name ASC",0,"");
+        $param=array_merge(["pagenum"=>$this->model->calculate_pages(),"clickedorder"=>"file_name/ASC/","word"=>"","sort"=>$this->SORTING],$param);
+        $this->view("filestorageview",$param);
 
 
 
@@ -44,12 +37,12 @@ class FileStorage extends Controller {
 
     public function uploadFile() {
         if (!isset($_POST["uploadfile"])) {
-            call_user_func_array(["errorpage","index"],[["message"=>"Az oldal nem található!"]]);
-            return;
+            header("location: \\filemanager\public\\errorpage");
+            exit();
         }
         $name=$_FILES["file"]["name"];
         if (empty($name)) {
-            call_user_func_array(["filestorage","index"],[["uploadErr"=>"Válassz fájlt!"]]);
+            call_user_func_array(["filestorage","index"],[["message"=>"Válassz fájlt!"]]);
             return;
         }
 
@@ -61,23 +54,26 @@ class FileStorage extends Controller {
             $uploadErr=$this->model->insertFile($name,$type,$path,$size);
             switch ($uploadErr) {
                 case 0:
-                    call_user_func_array(["filestorage","index"],[["uploadErr"=>"Sikeres feltöltés!"]]);
+                    call_user_func_array(["filestorage","index"],[["message"=>"Sikeres feltöltés!"]]);
                     break;
                 case 1:
-                    call_user_func_array(["filestorage","index"],[["uploadErr"=>"Hiba a feltöltés során!"]]);
+                    call_user_func_array(["filestorage","index"],[["message"=>"Hiba a feltöltés során!"]]);
+                    break;
+                case 2:
+                    call_user_func_array(["filestorage","index"],[["message"=>"Nem használhatja az alábbi karaktereket:%,?,^,#,&,!,~,ˇ,°,˛,`"]]);
                     break;
             }
 
 
         } else {
-            call_user_func_array(["filestorage","index"],[["uploadErr"=>"Hiba a feltöltés során!"]]);
+            call_user_func_array(["filestorage","index"],[["message"=>"Hiba a feltöltés során!"]]);
             return;
         }
-
-        echo "NAME: ".$name."<br/>";
-        echo "type: ".$type."<br/>";
-        echo "path: ".$path."<br/>";
-        echo "size: ".$size."<br/>";
+        //TODO:NEM LEHET FÁJLNÉVBE HASZNÁLNI +,!,?,%,/
+        //echo "NAME: ".$name."<br/>";
+        //echo "type: ".$type."<br/>";
+        //echo "path: ".$path."<br/>";
+        //echo "size: ".$size."<br/>";
     }
 
     public function downloadFile($param=[]) {
@@ -104,48 +100,54 @@ class FileStorage extends Controller {
                 call_user_func_array(["filestorage","index"],[["message"=>"Sikeres törlés!"]]);
                 break;
             case 1:
-                call_user_func_array(["errorpage","index"],[["message"=>"Az oldal nem található"]]);
-                break;
+                header("location: \\filemanager\public\\errorpage");
+                exit();
         }
     }
 
-    public function listfiles($column="", $order="") {
-        //echo "COL: ".$column."<br/>";
-        //echo "ORDER: ".$order."<br/>";
-        $orders=["nameorder"=>"file_name/DESC","sizeorder"=>"file_size/ASC","modifdateorder"=>"modif_date/DESC"];
-        //validation
-        $counter=0;
-        foreach ($orders as $item) {
-            if ((strcmp($column,explode("/",$item)[0])==0)) {
-                //echo "COL: ".$column." item: ".explode("/",$item)[0]."<br/>";
-                $counter++;
-            }
+    public function listfiles($column, $order,$pagenum,$word) {
+
+
+
+
+
+
+    }
+
+
+    public function search($column=null, $order=null,$pagenum=null,$word="") {
+
+        if(isset($_POST["search"])) {
+            $word=str_replace(" ","!",$_POST["word"]);
         }
-        //echo "strcmp asc: ".strcmp($order,"ASC")."<br/>";
-        //echo "strcmp desc".strcmp($order,"DESC")."<br/>";
-        if ($counter!=1 or (strcmp($order,"ASC")!=0 and strcmp($order,"DESC")!=0 )) {
+
+        if (strcmp($order,"ASC")!=0 and strcmp($order,"DESC")!=0 ) {
             echo "asdasd";
             header("location: \\filemanager\public\\errorpage");
             exit();
         }
 
-        foreach ($orders as &$item) {
-            $exploded=explode("/",$item);
-            if (strcmp($column,$exploded[0])==0) {
-                echo "true: col:".$column." item: ".explode("/",$item)[0]."<br/>";
-                if (strcmp($order,"ASC")==0) {
-                    $item=$column."/"."DESC";
-                } else {
-                    $item=$column."/"."ASC";
-                }
-                echo "INORDERS: ".$item." ORDERBYIINPUT: ".$column." ".$order;
-
-            }
+        switch ($column) {
+            case "file_name":
+                break;
+            case "file_size":
+                break;
+            case "modif_date":
+                break;
+            default:
+                header("location: \\filemanager\public\\errorpage");
+                exit();
         }
-        $GLOBALS["files"]=$this->model->selectFiles($column." ".$order);
-        $msg=$orders;
-        $msg["pagenum"]=$this->pagenum;
+
+        strcmp($order,"ASC")==0?$this->SORTING="DESC/0":$this->SORTING="ASC/0";
+
+        $GLOBALS["files"]=$this->model->file_list($column." ".$order,$pagenum,str_replace("!"," ",$word));
+        $word=str_replace("!"," ",$word);
+        $msg=["sort"=>$this->SORTING,"pagenum"=>$this->model->calculate_pages($word),"clickedorder"=>$column."/".$order."/"];
+        strlen($word)!=0?$word="/".$word:"";
+        $msg["word"]=$word;
         $this->view("filestorageview",$msg);
+
     }
 
 

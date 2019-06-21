@@ -35,13 +35,17 @@ class App {
         //echo(var_dump($this->controller));
         //echo("method: ". $this->method."<br/>");
         //echo "PARAMETERS: ";
-        //print_r($this->parameters);
+        //print_r($this->parameters)."<br/>";
         call_user_func_array([$this->controller,$this->method],$this->parameters);
     }
 
 
     public function processURL() {
         if(isset($_GET["url"])) {
+            //echo "URL: ".$_GET["url"]."<br/>";
+            //echo "VALIDATED URL: ";
+            //print_r(explode("/",filter_var(rtrim($_GET["url"],"/"),FILTER_SANITIZE_URL)));
+            //echo "<br/>";
             return explode("/",filter_var(rtrim($_GET["url"],"/"),FILTER_SANITIZE_URL));
 
         }

@@ -13,7 +13,7 @@ class SignUp extends Controller {
         $this->view("signupview",$errors);
     }
 
-    public function signup() {
+    public function signging() {
         $username=$_POST["username"];
         $password=$_POST["password"];
         $email=$_POST["email"];
@@ -22,6 +22,7 @@ class SignUp extends Controller {
         if(!strlen($name)==0 and !strlen($username)==0 and !strlen($password)==0 and !strlen($email)==0 ) {
             $array=$this->model->SignUp($name,$email,$username,$password);
             if (empty($array)) {
+                echo "called";
                 call_user_func_array(["signup","index"],array(["message"=>"Sikeres regisztáció!"]));
             } else {
                 foreach ($array as $item) {
@@ -50,6 +51,7 @@ class SignUp extends Controller {
                             break;
                     }
                 }
+                echo "else called";
                 call_user_func_array(["signup","index"],array($errorArray));
             }
 

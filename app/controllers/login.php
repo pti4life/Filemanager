@@ -13,7 +13,6 @@ class Login extends Controller {
     }
 
     public function index($parameter=[]) {
-        //echo "Login index called";
         $this->view("loginview",$parameter);
 
     }
@@ -23,7 +22,6 @@ class Login extends Controller {
         $password=$_POST["password"];
         if(!(strlen($username)==0 or strlen($password)==0)) {
             $status=$this->model->login($username,$password);
-            echo "statis: ".$status;
             switch ($status) {
                 case 0:
                     Session::init();
@@ -31,6 +29,7 @@ class Login extends Controller {
                     Session::set('user_name', $username);
                     echo "BEJELENTKEZÉS..";
                     header("Location: ..\\filestorage");
+                    exit();
                     break;
                 case 1:
                     call_user_func_array(["login","index"],[["message"=>"Nem található ilyen fehasználó!"]]);
@@ -45,7 +44,4 @@ class Login extends Controller {
         }
     }
 
-    public function test() {
-        //echo "kolbi";
-    }
 }

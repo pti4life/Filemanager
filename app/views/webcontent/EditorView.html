@@ -1,9 +1,9 @@
 <div id="editorview">
-    <div class="storageerror"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?></div><br/>
-    <form action="http://localhost\filemanager\public\editor\save" method="POST">
-        Fájlnév: <input type="text" name="filename">
+    <div class="storageerror"><?php echo $GLOBALS["msg"]["message"]??''?></div><br/>
+    <form action="http://localhost\filemanager\public\editor\<?php echo $GLOBALS['savebutt']?>" method="POST">
+        Fájlnév: <input type="text" name="filename" value="<?php echo $GLOBALS['filename']?>"></input>
         <input type="submit" name="savetext"><br/>
-        <textarea rows="30" cols="100" name="text" ><?php echo isset($GLOBALS["msg"]["areacontent"])?$GLOBALS["msg"]["areacontent"]:""?></textarea>
+        <textarea rows="30" cols="100" name="text" ><?php echo $GLOBALS["areacontent"]?></textarea>
     </form>
 </div>
 

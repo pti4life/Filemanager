@@ -1,7 +1,7 @@
 <div id="filestorage">
     <div></div>
     <h2>Fájlkezelő</h2>
-    <div class="storageerror"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
+    <div class="storageerror"><?php echo $GLOBALS["msg"]["message"]?? ''?><br/></div>
     <div id="upload-container">
         <div>
             <h3>Keresés:</h3>
@@ -21,17 +21,23 @@
     </div>
 
     <table>
-        <tr>
-            <?php echo('
-                <th><a href="http://localhost\filemanager\public\filestorage\search/file_name/'.$GLOBALS['msg']['sort'].$GLOBALS['msg']['word'].'">Fajlnev</a></th>
-                <th><a href="http://localhost\filemanager\public\filestorage\search/file_size/'.$GLOBALS['msg']['sort'].$GLOBALS['msg']['word'].'">Fajlmeret</a></th>
-                <th><a href="http://localhost\filemanager\public\filestorage\search/modif_date/'.$GLOBALS['msg']['sort'].$GLOBALS['msg']['word'].'">Modositva</a></th>');?>
+        <th>
+            <?php
+                echo('
+                <th><a href="http://localhost\filemanager\public\filestorage\search/file_name/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Fajlnev</a></th>
+                <th><a href="http://localhost\filemanager\public\filestorage\search/file_size/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Fajlmeret</a></th>
+                <th><a href="http://localhost\filemanager\public\filestorage\search/modif_date/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Modositva</a></th>');?>
                 <th>Muveletek:</th>
                 <th>Küldte:</th>
         </tr>
         <?php
+            echo('<form action="">');
             foreach ($GLOBALS["files"] as $items) {
+
                 echo('<tr>');
+                    if($GLOBALS["checkbox"]) {
+                        echo('<td><input type="checkbox" name="filename" value="'.$items['file_name'].'"></td>');
+                    }
                     echo('<td>'.$items["file_name"].'</td>
                         <td>'.$items["file_size"].' bytes</td>
                         <td>'.$items["modif_date"].'</td>
@@ -42,19 +48,20 @@
                             <a href="http://localhost\filemanager\public\filestorage\deletefile/'.$items['file'].'">
                                 <img src="http://localhost\filemanager\app\icons\delete.png">
                             </a>');
-                            echo(strcmp($items["file_type"],'text/plain')==0?'<a href="http://localhost\filemanager\public\editor\edit/'.$items['file'].'">
+                            echo(strcmp($items["file_type"],'text/plain')==0?'<a href="http://localhost\filemanager\public\editor/edit/'.$items['file'].'">
                             <img src="http://localhost\filemanager\app\icons\edit.png">
                         </a>':"");
 
-                        echo('</td>  <td>Küldte:</td>');
+                        echo('</td>  <td></td>');
                 echo('</tr>');
 
             }
+            echo('</form>');
         ?>
     </table>
     <div id="pagnumber-container">
         <?php
-        for ($i=1; $i<$GLOBALS["msg"]["pagenum"];$i++) {
+        for ($i=1; $i<$GLOBALS["pagenumber"];$i++) {
             echo('<a href="http://localhost\filemanager\public\filestorage\search/'.$GLOBALS['msg']['clickedorder'].($i-1).$GLOBALS['msg']['word'].'">'.$i.'</a>');
         }
         ?>

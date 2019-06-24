@@ -5,11 +5,12 @@ function autoload($className) {
         '..\\app\\controllers\\',
         '..\\app\\models\\',
         '..\\app\\core\\',
+        '..\\app\\core\\PHPMailer\\'
     );
 
-    $filename="";
     foreach ($directorys as $directory) {
-        $filename = strtolower($directory) . $className . ".php";
+        $filename = $directory . $className . ".php";
+        //echo "filename: ".$filename."<br/>";
         if (file_exists($filename)) {
             //echo "autoloaded: ".$filename."<br/>";
             require_once $filename;

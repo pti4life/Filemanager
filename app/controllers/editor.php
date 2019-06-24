@@ -23,8 +23,8 @@ class Editor extends Controller {
     }
 
     public function create() {
-        if(!isset($_POST)) {
-            header("location:..\public\\errorpage");
+        if(!isset($_POST["savetext"])) {
+            header("location:..\public\\filestorage");
             exit;
         }
         $filename=$_POST["filename"];
@@ -39,7 +39,7 @@ class Editor extends Controller {
             case 1:
                 $GLOBALS["areacontent"]=$content;
                 $GLOBALS["filename"]=$filename;
-                call_user_func_array(["editor","index"],[["message"=>"A fajlnevben nem hasznalhato az alábbi karaktereket:%,?,^,#,&,!,~,ˇ,°,˛,`"]]);
+                call_user_func_array(["editor","index"],[["message"=>"A fájlnévben nem használhatóak speciális karakterek"]]);
                 break;
             case 2:
                 $GLOBALS["areacontent"]=$content;
@@ -56,9 +56,8 @@ class Editor extends Controller {
     }
 
     public function edit($fnameid) {
-
         $msg=$this->model->edit_file($fnameid);
-        echo "FILEID: ".$fnameid;
+        //echo "FILEID: ".$fnameid;
         if (is_array($msg)) {
             $GLOBALS["savebutt"]="update/".$fnameid;
             $GLOBALS["areacontent"]=$msg["content"];
@@ -69,11 +68,11 @@ class Editor extends Controller {
         } else {
             switch ($msg) {
                 case 1:
-                    header("location:filemanager\public\\errorpage");
+                    header("location:\\filemanager\public\\errorpage");
                     exit;
                     break;
                 case 2:
-                    header("location:filemanager\public\\errorpage");
+                    header("location:\\filemanager\public\\errorpage");
                     exit;
                     break;
 
@@ -89,7 +88,7 @@ class Editor extends Controller {
         $filename=$_POST["filename"];
         $content = $_POST["text"];
         $msg=$this->model->update_file($filenameid,$filename,$content);
-        echo "message: ".$msg."<br/>";
+        //echo "message: ".$msg."<br/>";
         switch ($msg) {
             case 1:
                 $GLOBALS["savebutt"]="update/".$filenameid;

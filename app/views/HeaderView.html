@@ -1,25 +1,25 @@
 <!doctype html>
 <html>
 <head>
-    <title>Fileamanager</title>
+    <title>Fájlkezelő</title>
         <link rel="stylesheet" href="\filemanager\public\css\default.css"/>
 </head>
 <body>
 
 <div id="header">
     <div id="greeting"><?php echo Session::get("user_name")?'Hi, '.Session::get("user_name"):''?></div>
-    <h1>File manager</h1>
+    <h1>Fájlkezelő</h1>
 
-    <a href="http://localhost\filemanager\public\home">Description</a>
-    <a href="http://localhost\filemanager\public\aboutus">About Us</a>
-    <?php echo Session::get("loggedin")?"":'<a href="http://localhost\filemanager\public\signup">SignUp</a>'?>
+    <a href="http://localhost\filemanager\public\home">Leírás</a>
+    <a href="http://localhost\filemanager\public\aboutus">Rólunk</a>
+    <?php echo Session::get("loggedin")?"":'<a href="http://localhost\filemanager\public\signup">Regisztráció</a>'?>
 
-    <?php echo Session::get("loggedin")?"":'<a href="http://localhost\filemanager\public\login">Login</a>'?>
+    <?php echo Session::get("loggedin")?"":'<a href="http://localhost\filemanager\public\login">Bejelentkezés</a>'?>
 
     <?php echo Session::get("loggedin")?'<div id="logged">
-                                            <a href="http://localhost\filemanager\public\filestorage\logout">logout</a>
-                                            <a href="http://localhost\filemanager\public\profile">Profile</a>
-                                            <a href="http://localhost\filemanager\public\filestorage\index">My files</a>
+                                            <a href="http://localhost\filemanager\public\filestorage\logout">Kijelentkezés</a>
+                                            <a href="http://localhost\filemanager\public\profile">Profil</a>
+                                            <a href="http://localhost\filemanager\public\filestorage\index">Fájljaim</a>
                                         </div>':""?>
 
 </div>

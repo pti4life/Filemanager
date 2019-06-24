@@ -30,7 +30,7 @@ class Profile extends Controller {
                 call_user_func_array(["profile","index"],[["message"=>"Az új felhasználónév már létezik!"]]);
                 break;
             case 2:
-                call_user_func_array(["profile","index"],[["message"=>"Nem megfelelő az új felhasználónév(túl rövid))!"]]);
+                call_user_func_array(["profile","index"],[["message"=>"A felhasználónév túl rövid vagy speciális karaktereket tartalmaz)!"]]);
                 break;
         }
 

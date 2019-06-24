@@ -12,13 +12,9 @@ class ProfileModel extends Model {
     public function selectUSer() {
 
         $user=Session::get("user_name");
-        echo "USERNAME: ".$user."<br/>";
         $stmt=$this->db->prepare("SELECT user_name,user_uname,user_email FROM users WHERE user_uname=:username");
         $stmt->execute(["username"=>$user]);
         $select=$stmt->fetch(PDO::FETCH_ASSOC);
-        echo "selected USER: ";
-        print_r($select);
-        echo "<br/>";
         return $select;
     }
 
@@ -38,8 +34,7 @@ class ProfileModel extends Model {
         }
     }
 
-    //return 1 if new password doesnt valid
-    //return 2 if old password isnt correct
+
     public function updatePassword() {
         $oldpassword=$_POST["oldpassword"];
         $newpassword=$_POST["newpassword"];

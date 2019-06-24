@@ -1,8 +1,8 @@
 <div id="editorview">
-    <div class="storageerror"><?php echo $GLOBALS["msg"]["message"]??''?></div><br/>
-    <form action="http://localhost\filemanager\public\editor\<?php echo $GLOBALS['savebutt']?>" method="POST">
+    <div class="error"><?php echo $GLOBALS["msg"]["message"]??''?></div><br/>
+    <form  action="http://localhost\filemanager\public\editor\<?php echo $GLOBALS['savebutt']?>" method="POST">
         Fájlnév: <input type="text" name="filename" value="<?php echo $GLOBALS['filename']?>"></input>
-        <input type="submit" name="savetext"><br/>
+        <input type="submit" value="Mentés" name="savetext"><br/>
         <textarea rows="30" cols="100" name="text" ><?php echo $GLOBALS["areacontent"]?></textarea>
     </form>
 </div>

@@ -1,34 +1,28 @@
 <?php
 class FilestorageModel extends Model {
 
-    //TODO: FILE NAME VALIDATION
-    // INSERT FILE
-
     public function __construct() {
         parent::__construct();
         $this->USERNAME=Session::get("user_name");
-        $this->USERID=$this->getId();
     }
 
     private $LIMIT;
     private $USERNAME;
-    private $USERID;
-
 
 
     public function insert_file($filename=null,$type,$path,$filesize=null,$senderid=null) {
-        //TODO: VALIDATION DUPLICATING WITH EDITORMODEL
         if (preg_match('/[%?^#&!~ˇ˘°˛˙´˙`˛°˘]/',$filename)) {
             return 2;
         }
         if (strlen(trim($filename))==0) {
             return 3;
         }
+        $uid=$this->getId();
 
         try {
             $stmt = $this->db->prepare('INSERT INTO files(file_name,file_size,file_type,user_id,sender_id)
                                                                     VALUES(:filename,:filesize,:filetype,:userid,:senderid)');
-            $stmt->execute(["filename" => $filename,"filesize"=>$filesize,"filetype"=>$type ,"userid"=>$this->USERID,"senderid"=>$senderid]);
+            $stmt->execute(["filename" => $filename,"filesize"=>$filesize,"filetype"=>$type ,"userid"=>$uid,"senderid"=>$senderid]);
             $this->upload($filename,$path);
         } catch (PDOException $ex) {
             echo $ex;
@@ -39,8 +33,7 @@ class FilestorageModel extends Model {
     }
 
     private function upload($filename,$path) {
-        //WARNING MODIFIED NEWPATH
-        $newpath="../app/files/".$this->USERID;
+        $newpath="../app/files/".$this->USERNAME;
         if (!file_exists($newpath)) {
             mkdir($newpath);
         }
@@ -57,13 +50,12 @@ class FilestorageModel extends Model {
 
 
     public function file_list($orderby="file_name ASC", $pagenum=0,$word="") {
-        echo "WORD in file_list:".$word."<br/>";
-        //NOT NUMERIC VALUE
         $offset=$pagenum*$this->LIMIT;
         $word="%".strtolower($word)."%";
-        $stmt = $this->db->prepare("select concat(file_id,substring(file_name,(CHAR_LENGTH(file_name) - LOCATE('.', REVERSE(file_name))+1))) AS file,file_name,file_size,modif_date, sender_id,file_type 
-                                                from users inner join files on users.user_id=files.user_id
-                                                where user_uname=:username and LOWER(file_name) like :fname
+        $stmt = $this->db->prepare("select concat(file_id,substring(file_name,(CHAR_LENGTH(file_name) - LOCATE('.', REVERSE(file_name))+1))) AS file,ouf.file_name,ouf.file_size,ouf.modif_date, ius.user_uname as sender,ouf.file_type 
+                                                from users ous inner join files ouf on ous.user_id=ouf.user_id
+                                                LEFT JOIN users ius on ouf.sender_id=ius.user_id
+                                                where ous.user_uname=:username and LOWER(ouf.file_name) like :fname
                                                 ORDER BY ".$orderby." LIMIT ".$this->LIMIT." OFFSET ".$offset);
 
         $stmt->execute(["username"=>$this->USERNAME,"fname"=>$word]);
@@ -76,7 +68,6 @@ class FilestorageModel extends Model {
 
 
 
-    //return 1 show errorpage
     public function download_file($fnameid) {
         //echo "id: ".$id;
         $stmt = $this->db->prepare("select file_name,file_type 
@@ -88,19 +79,13 @@ class FilestorageModel extends Model {
         $rowc=$stmt->rowCount();
         if ($rowc==1) {
             $file="../app/files/".$this->USERNAME."/".$fnameid;
-            //echo "file: ".$file;
             if (!file_exists($file)) {
                 return 2;
             }
-
-            header('Content-Description: File Transfer');
-            header('Content-Type: '.$exsist["file_type"]);
             header('Content-Disposition: attachment; filename="'.$exsist["file_name"].'"');
-            //header('Expires: 0');
-            //header('Cache-Control: must-revalidate');
-            header('Content-Transfer-Encoding: binary');
-            //header('Pragma: public');
-            //header('Content-Length'.filesize($file));
+            header('Content-Description: File Transfer');
+            header('Content-Type:'.$exsist["file_type"]);
+            //header('Content-Transfer-Encoding: binary');
             readfile($file);
             exit;
         } else {
@@ -128,6 +113,91 @@ class FilestorageModel extends Model {
             return 1;
         }
     }
+
+
+    public function send_files($filenameids,$tousername) {
+        if (empty($filenameids)) {
+            return 3;
+        }
+        foreach ($filenameids as $filenameid) {
+            $path="../app/files/".$this->USERNAME."/".$filenameid;
+            echo "PATH: ".$path;
+            if (!file_exists($path)) {
+                echo "nem létezik";
+                return 1;
+            }
+        }
+
+        $stmt = $this->db->prepare("select user_name,user_uname,user_email from users where user_uname=:touname");
+
+        $stmt->execute(["touname"=>$tousername]);
+        $sendtouser = $stmt->fetch(PDO::FETCH_ASSOC);
+        $rowc=$stmt->rowCount();
+        if ($rowc!=1) {
+            return 2;
+        }
+
+        $stmt = $this->db->prepare('INSERT INTO files (file_name,file_size,file_type,user_id,sender_id)
+                                                SELECT ofi.file_name, ofi.file_size,ofi.file_type,ius.user_id ,ous.user_id
+                                                FROM files ofi inner join users ous on ofi.user_id=ous.user_id
+                                                LEFT JOIN users ius on ius.user_uname=:touname
+                                                WHERE ous.user_id=(select user_id from users where user_uname=:senderuname) and file_id=:fileid');
+
+
+
+        $newpath="../app/files/".$sendtouser["user_uname"];
+        if (!file_exists($newpath)) {
+            mkdir($newpath);
+        }
+        $filenames="";
+        $fnamestatement=$this->db->prepare('SELECT file_name FROM files WHERE file_id=:fileid ');
+        foreach ($filenameids as $fnameid) {
+            $path="../app/files/".$this->USERNAME."/".$fnameid;
+            $fnamearr=explode(".",$fnameid);
+            $stmt->execute(["senderuname"=>$this->USERNAME ,"fileid"=>$fnamearr[0],"touname"=>$sendtouser["user_uname"] ]);
+            $newid=$this->db->lastInsertId();
+            $fnamestatement->execute(["fileid"=>$newid]);
+            $result=$fnamestatement->fetch(PDO::FETCH_ASSOC);
+            $filenames=$filenames.",".$result["file_name"];
+            count($fnamearr)==1?$fnameid=$newid:$fnameid=$newid.".".end($fnamearr);
+            copy($path,$newpath."/".$fnameid);
+        }
+
+        $errmsg=$this->send_email($this->USERNAME,$sendtouser["user_email"],$sendtouser["user_name"],$filenames);
+        if ($errmsg!=0) {
+            return 4;
+        }
+
+        return 0;
+
+    }
+    private function send_email($sendername,$sendtoemail,$sendtoname,$filenames) {
+        $mail=Mail::getMail();
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'kallairolii@gmail.com';
+            $mail->Password   = '';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port       = 587;
+
+            //Recipients
+            $mail->CharSet = 'UTF-8';
+            $mail->setFrom('kallairolii@gmail.com', 'Company');
+            $arr=explode(" ",$sendtoname);
+            $mail->addAddress($sendtoemail, end($arr));     // Add a recipient
+
+            $mail->Subject = 'Új fájlja van';
+            $mail->Body    = 'Kedves, '.$sendtoname."!\n Új fájl(jai) vannak:".$filenames."\nKüldte: ".$sendername;
+
+            $mail->send();
+            return 0;
+        } catch (Exception $e) {
+            return 1;
+        }
+    }
+
 
     public function calculate_pages($word="") {
         $word="%".strtolower($word)."%";
@@ -158,7 +228,6 @@ class FilestorageModel extends Model {
     private function getId() {
         $stmt = $this->db->prepare("SELECT user_id FROM users WHERE user_uname=:uname");
         $stmt->execute(["uname" =>$this->USERNAME ]);
-        //TODO: JAVÍTANI AZ ÖSSZES HELYEN A DUPLIKÁCIÓT
         $userid = $stmt->fetch(PDO::FETCH_ASSOC);
         return $userid["user_id"];
 

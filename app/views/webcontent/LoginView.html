@@ -1,9 +1,9 @@
 <div class="defaultform">
     <h2>Login</h2>
     <form action="http://localhost\filemanager\public\login\loginsubmit" method="POST">
-        <div class="error"><?php echo isset($GLOBALS["msg"]["message"])?$GLOBALS["msg"]["message"]:""?><br/></div>
+        <div class="error"><?php echo $GLOBALS["msg"]["message"]??""?><br/></div>
         Username: <input type="text" name="username"><br>
         Password: <input type="password" name="password"><br>
-        <input type="submit" name="asd">
+        <input type="submit" value="Bejelentkezés" name="asd">
     </form>
 </div>

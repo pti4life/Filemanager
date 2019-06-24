@@ -11,6 +11,12 @@ h1 {
 }
 
 
+h2 {
+    margin-bottom:0px
+}
+
+
+
 
 #header>a,#logged>a {
     margin:5px 5px;
@@ -35,11 +41,24 @@ h1 {
     margin-top:25px;
 }
 
-#filestorage {
-    align-content:center;
+form>input {
+    margin:5px;
 }
 
-#filestorage>table {
+#filestorage {
+    align-content:center;
+    display:flex;
+}
+#storageleft {
+    margin-top:115px
+}
+
+#storageleft>div {
+    margin-top:40px;
+}
+
+
+table {
     width: 550px;
     border-collapse:collapse;
     margin-right:50px
@@ -58,16 +77,20 @@ h1 {
 
 }
 .storageerror {
-    color:red;
     width: 550px;
     text-align: center;
-    font-size: larger;
 }
 
 #pagnumber-container {
     width:550px;
     text-align:center;
 }
+
+#pagnumber-container>a {
+    margin: 2px;
+}
+
+
 
 tr:nth-child(even) {
     background-color:lightcyan;
@@ -97,16 +120,22 @@ th>a:hover {
     color:grey;
 }
 
+
+
 #greeting {
     display:inline;
     float: right;
 }
 
-.profile {
+.profile:not(:first-child) {
     display: flex;
 }
-.profile {
-    display: flex;
+.profile>.error {
+    margin-right:20px
+}
+
+.profile>.error {
+    margin-right: 40px;
 }
 
 
@@ -137,6 +166,7 @@ body {
 
 .error {
     color:red;
+    font-size: larger;
 }
 
 #footer {
@@ -147,7 +177,7 @@ body {
 
 
 .defaultform {
-    padding-left: 10px;
+    padding-left:20px;
     border: 1px solid black;
     width: 300px;
 }

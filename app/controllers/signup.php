@@ -38,7 +38,7 @@ class SignUp extends Controller {
                             $errorArray["emailErr"]="Nem megfelelő emailcím.";
                             break;
                         case 4:
-                            $errorArray["passwordErr"]="Nem megfelelő jelszó.";
+                            $errorArray["passwordErr"]="Túl rövid a jelszó.";
                             break;
                         case 5:
                             $errorArray["emailErr"]="Ez az email cím létezik.";

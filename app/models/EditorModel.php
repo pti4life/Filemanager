@@ -11,7 +11,6 @@ class EditorModel extends Model {
 
     }
 
-    //TODO: CODE DUPLICATION WITH FILESTORAGEMODEL NSERT_FILE METHOD
     public function save_file($filename,$content) {
         if (preg_match('/[%?^#&!~ˇ˘°˛˙´˙`˛°˘]/',$filename)) {
             return 1;
@@ -45,7 +44,6 @@ class EditorModel extends Model {
 
 
     public function edit_file($id) {
-        //VALIDATION
         try {
             $stmt = $this->db->prepare("select file_name,file_type 
                                                 from users inner join files on users.user_id=files.user_id
@@ -60,13 +58,8 @@ class EditorModel extends Model {
 
         if ($rowc==1) {
             $path="../app/files/".$this->USERNAME."/".$id;
-            $fp = fopen($path, "r+");
-            $data="";
-            while(!feof($fp) and filesize($path)>0) {
-                $data = $data.fgets($fp, filesize($path));
-                //echo "$data <br>";
-            }
-            fclose($fp);
+            echo "PATH:".$path;
+            $data=file_get_contents($path);
             return ["content"=>$data,"filename"=>explode(".",$result["file_name"])[0]];
         } else {
             return 2;
@@ -86,7 +79,7 @@ class EditorModel extends Model {
         $size=filesize($path);
         $userid=$this->getId();
         try {
-            $stmt=$this->db->prepare("UPDATE files SET file_name=:filename, file_size=:filesize where user_id=".$userid." and file_id=".explode(".",$fnameid)[0]);
+            $stmt=$this->db->prepare("UPDATE files SET file_name=:filename, file_size=:filesize, modif_date=CURRENT_TIMESTAMP() where user_id=".$userid." and file_id=".explode(".",$fnameid)[0]);
             $stmt->execute(["filename"=>$newname.".txt","filesize"=>$size]);
             file_put_contents($path,$newcontent);
             return 0;

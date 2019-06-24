@@ -1,72 +1,83 @@
 <div id="filestorage">
-    <div></div>
-    <h2>Fájlkezelő</h2>
-    <div class="storageerror"><?php echo $GLOBALS["msg"]["message"]?? ''?><br/></div>
-    <div id="upload-container">
-        <div>
-            <h3>Keresés:</h3>
+    <div id="storageright">
+        <h1>Fájlkezelő</h1>
+        <div class="error"><?php echo $GLOBALS["msg"]["message"]?? ''?></div>
+        <div id="search">
             <form action="http://localhost\filemanager\public\filestorage\search\file_name\ASC\0" method="POST">
-                <input type="text" name="word" placeholder="pl.:orarend">
-                <input type="submit" name="search">
+                <input type="text" name="word" size="60" placeholder="pl.:orarend">
+                <input type="submit" value="Keresés" name="search">
             </form>
         </div>
-        <div>
-            <h3>Feltöltés</h3>
-            <form action="http://localhost\filemanager\public\filestorage\uploadfile" method="POST" enctype="multipart/form-data">
-                <input type="file" name="file">
-                <input type="submit" name="uploadfile">
-            </form>
-        </div>
-
-    </div>
-
-    <table>
-        <th>
-            <?php
+        <table>
+            <th>
+                <?php
                 echo('
-                <th><a href="http://localhost\filemanager\public\filestorage\search/file_name/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Fajlnev</a></th>
-                <th><a href="http://localhost\filemanager\public\filestorage\search/file_size/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Fajlmeret</a></th>
-                <th><a href="http://localhost\filemanager\public\filestorage\search/modif_date/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Modositva</a></th>');?>
-                <th>Muveletek:</th>
-                <th>Küldte:</th>
-        </tr>
-        <?php
-            echo('<form action="">');
+                <th><a href="http://localhost\filemanager\public\filestorage\search/file_name/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Fájlnév</a></th>
+            <th><a href="http://localhost\filemanager\public\filestorage\search/file_size/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Fájlméret</a></th>
+            <th><a href="http://localhost\filemanager\public\filestorage\search/modif_date/'.$GLOBALS['sorting'].$GLOBALS['msg']['word'].'">Módosítva</a></th>');?>
+            <th>Muveletek:</th>
+            <th>Küldte:</th>
+            </tr>
+            <!--NOT WORKING CHECKBOXES-->
+            <?php
+            echo('<form  action="http://localhost\filemanager\public\filestorage\send" method="POST" id="checkbox">
+                    <div id="sending">
+
+                    </div>');
+
             foreach ($GLOBALS["files"] as $items) {
 
-                echo('<tr>');
-                    if($GLOBALS["checkbox"]) {
-                        echo('<td><input type="checkbox" name="filename" value="'.$items['file_name'].'"></td>');
-                    }
-                    echo('<td>'.$items["file_name"].'</td>
-                        <td>'.$items["file_size"].' bytes</td>
-                        <td>'.$items["modif_date"].'</td>
-                        <td>
-                            <a href="http://localhost\filemanager\public\filestorage\downloadfile/'.$items['file'].'">
-                                <img src="http://localhost\filemanager\app\icons\download.png">
-                            </a>
-                            <a href="http://localhost\filemanager\public\filestorage\deletefile/'.$items['file'].'">
-                                <img src="http://localhost\filemanager\app\icons\delete.png">
-                            </a>');
-                            echo(strcmp($items["file_type"],'text/plain')==0?'<a href="http://localhost\filemanager\public\editor/edit/'.$items['file'].'">
-                            <img src="http://localhost\filemanager\app\icons\edit.png">
-                        </a>':"");
+            echo('<tr>');
+            if($GLOBALS["checkbox"]) {
+            echo('<td><input type="checkbox" name="filename[]" value="'.$items['file'].'"></td>');
+            }
+            echo('<td>'.$items["file_name"].'</td>
+            <td>'.$items["file_size"].' bytes</td>
+            <td>'.$items["modif_date"].'</td>
+            <td>
+                <a href="http://localhost\filemanager\public\filestorage\downloadfile/'.$items['file'].'">
+                    <img src="http://localhost\filemanager\app\icons\download.png">
+                </a>
+                <a href="http://localhost\filemanager\public\filestorage\deletefile/'.$items['file'].'">
+                    <img src="http://localhost\filemanager\app\icons\delete.png">
+                </a>');
+                echo(strcmp($items["file_type"],'text/plain')==0?'<a href="http://localhost\filemanager\public\editor/edit/'.$items['file'].'">
+                <img src="http://localhost\filemanager\app\icons\edit.png">
+            </a>':"");
 
-                        echo('</td>  <td></td>');
-                echo('</tr>');
+                echo('</td>  <td>'.$items['sender'].'</td>');
+            echo('</tr>');
 
             }
-            echo('</form>');
-        ?>
-    </table>
-    <div id="pagnumber-container">
-        <?php
+            ?>
+
+        </table>
+        <div id="pagnumber-container">
+            <?php
         for ($i=1; $i<$GLOBALS["pagenumber"];$i++) {
             echo('<a href="http://localhost\filemanager\public\filestorage\search/'.$GLOBALS['msg']['clickedorder'].($i-1).$GLOBALS['msg']['word'].'">'.$i.'</a>');
-        }
-        ?>
+            }
+            ?>
+        </div>
+            <?php echo(
+                        $GLOBALS["pagenumber"]>1?'(pipálja be a küldeni kívánt fájlokat)</br><input type="text" placeholder="Felhaszn. neve" name="username">
+                        <input type="submit" value="Küldés" name="send">':'');
+                        echo('</form>');
+            ?>
+
     </div>
 
 
+
+    <div id="storageleft">
+        <div class="defaultform">
+            <h3>Feltöltés</h3>
+            <form  action="http://localhost\filemanager\public\filestorage\uploadfile" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <input type="submit" value="Feltöltés" name="uploadfile">
+            </form>
+        </div>
+
+    </div>
 
 </div>

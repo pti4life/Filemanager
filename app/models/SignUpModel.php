@@ -7,14 +7,6 @@ class SignUpModel extends Model {
     }
 
 
-    //return 1 Invalid name
-    //return 2 Invalid username.
-    //return 3 Invalid email
-    //return 4. Invalid password
-    //return 5 email exists.
-    //return 6 username exists.
-    //return 7 Dadatabase exception
-    //empty errorarray succes signup
     public function SignUp($name, $email, $username, $password) {
         $errors=$this->isValidUser($name, $email, $username, $password);
         if (empty($errors)) {
@@ -47,10 +39,6 @@ class SignUpModel extends Model {
     }
 
 
-    //1: Nem megfelelő név
-    //2. Nem megfelelő felhasználónév
-    //3. Nem megfelelő emailcím
-    //4. Nem megfelelő a jelszó
     public function isValidUser($name, $email, $username, $password) {
         $errorArray=[];
         if (!UserOperations::isValidName($name)) {

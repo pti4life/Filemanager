@@ -5,10 +5,8 @@ $GLOBALS["sorting"]="ASC/0";
 $GLOBALS["pagenumber"]=0;
 
 class FileStorage extends Controller {
-    //TODO:WE CAN CALL file_list WITHOUT PARAMETERS ORDER:FILE_NAME, PAGENUM:0,WORD:""
-    //TODO: WE CAN CALL CALCULATE_PAGES WITH NONE PARAMETERS, THEN WE CALCULATE FOR ALL FILES
 
-    private $LIMIT=3;
+    private $LIMIT=6;
 
     function __construct() {
         Session::init();
@@ -17,7 +15,7 @@ class FileStorage extends Controller {
         if(!Session::get("loggedin")) {
             echo "nincs bejelentkezve";
             Session::destroy();
-            header("location:..\\errorpage");
+            header("location:..\\errorpage\loginerr");
             exit;
         }
         $this->setModel("filestoragemodel");
@@ -25,6 +23,10 @@ class FileStorage extends Controller {
     }
 
     public function index($param=[]) {
+        if(!is_array($param)) {
+            header("location: \\filemanager\public\\filestorage");
+            exit();
+        }
         $GLOBALS["files"]=$this->model->file_list();
         $GLOBALS["pagenumber"]=$this->model->calculate_pages();
         $param=array_merge(["clickedorder"=>"file_name/ASC/","word"=>""],$param);
@@ -149,6 +151,43 @@ class FileStorage extends Controller {
         $msg["word"]=$word;
         $this->view("filestorageview",$msg);
 
+    }
+
+    public function send() {
+        $submit=$_POST["send"];
+        $sendto=$_POST["username"];
+        if (!isset($submit) ) {
+            call_user_func_array(["filestorage","index"],[[]]);
+            return;
+        }
+        if (!isset($_POST["filename"]))  {
+            call_user_func_array(["filestorage","index"],[["message"=>"Legalább 1 fájlt küldeni kell!"]]);
+            return;
+        }
+        if (!isset($sendto)) {
+            call_user_func_array(["filestorage","index"],[["message"=>"Adja meg, hogy kinek szeretne küldeni"]]);
+            return;
+        }
+        $filearray=$_POST["filename"];
+
+        $errormsg=$this->model->send_files($filearray,$sendto);
+        switch ($errormsg) {
+            case 1:
+                call_user_func_array(["filestorage","index"],[["message"=>"A küldés sikertelen, a fájl(ok) nem találhatóak"]]);
+                break;
+            case 2:
+                call_user_func_array(["filestorage","index"],[["message"=>"A kiválasztott felhasználó nem található"]]);
+                break;
+            case 0:
+                call_user_func_array(["filestorage","index"],[["message"=>"Sikeres küldés!"]]);
+                break;
+            case 4:
+                call_user_func_array(["filestorage","index"],[["message"=>"Sikertelen email küldés!"]]);
+                break;
+            case 3:
+                call_user_func_array(["filestorage","index"],[["message"=>"Legalább 1 fájlt küldjön!"]]);
+                break;
+        }
     }
 
 

@@ -49,6 +49,19 @@ form>input {
     align-content:center;
     display:flex;
 }
+
+#createfile {
+    padding: 10px;
+    background-color:whitesmoke;
+    text-decoration: none;
+    color:black;
+    margin: 1px;
+    font-size: large;
+    border: black 1px solid;
+    text-transform: uppercase;
+
+}
+
 #storageleft {
     margin-top:115px
 }
@@ -127,15 +140,19 @@ th>a:hover {
     float: right;
 }
 
-.profile:not(:first-child) {
+.profile>.flex {
     display: flex;
 }
-.profile>.error {
+
+.profile>.flex>div {
     margin-right:20px
 }
 
 .profile>.error {
-    margin-right: 40px;
+    margin-left: 550px;
+    margin-bottom: 20px;
+    font-size: 24px;
+
 }
 
 

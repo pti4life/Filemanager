@@ -18,8 +18,7 @@ class ProfileModel extends Model {
         return $select;
     }
 
-    public function updateUsername() {
-        $newusername=$_POST["newusername"];
+    public function updateUsername($newusername) {
         if(UserOperations::checkUser($newusername)) {
             return 1;
         }
@@ -35,9 +34,7 @@ class ProfileModel extends Model {
     }
 
 
-    public function updatePassword() {
-        $oldpassword=$_POST["oldpassword"];
-        $newpassword=$_POST["newpassword"];
+    public function updatePassword($oldpassword,$newpassword) {
         if (UserOperations::isValidPassword($newpassword)) {
             $username=Session::get("user_name");
             if (UserOperations::authUser($username,$oldpassword)==0) {

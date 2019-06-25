@@ -11,12 +11,10 @@ class FileStorage extends Controller {
     function __construct() {
         Session::init();
 
-        //echo "session: ".Session::get("loggedin");
         if(!Session::get("loggedin")) {
-            echo "nincs bejelentkezve";
             Session::destroy();
-            header("location:..\\errorpage\loginerr");
-            exit;
+            header("location: \\filemanager\public\\errorpage");
+            exit();
         }
         $this->setModel("filestoragemodel");
         $this->model->setLimit($this->LIMIT);
@@ -79,16 +77,9 @@ class FileStorage extends Controller {
             call_user_func_array(["filestorage","index"],[["message"=>"Hiba a feltöltés során!"]]);
             return;
         }
-        //TODO:NEM LEHET FÁJLNÉVBE HASZNÁLNI +,!,?,%,/
-        //echo "NAME: ".$name."<br/>";
-        //echo "type: ".$type."<br/>";
-        //echo "path: ".$path."<br/>";
-        //echo "size: ".$size."<br/>";
     }
 
-    //Warning PARAM WAS ARRAY AND CHANGED TO NOT ARRAY
     public function downloadFile($fnameid) {
-        //WARNING empty function changed to strlen
         if (strlen($fnameid)==0) {
             header("location: \\filemanager\public\\errorpage");
             exit();
@@ -106,7 +97,6 @@ class FileStorage extends Controller {
 
     public function deleteFile($param) {
         $errmsg=$this->model->delete_file($param);
-        echo "errmsg: ".$errmsg;
         switch ($errmsg) {
             case 0:
                 call_user_func_array(["filestorage","index"],[["message"=>"Sikeres törlés!"]]);
@@ -123,9 +113,8 @@ class FileStorage extends Controller {
             $word=str_replace(" ","!",$_POST["word"]);
         }
 
-        if (strcmp($order,"ASC")!=0 and strcmp($order,"DESC")!=0 ) {
-            //echo "asdasd";
-            header("location: \\filemanager\public\\errorpage");
+        if ((strcmp($order,"ASC")!=0 and strcmp($order,"DESC")!=0) or !is_numeric($pagenum) ) {
+            header("location: \\filemanager\public\\filestorage");
             exit();
         }
 
@@ -137,7 +126,7 @@ class FileStorage extends Controller {
             case "modif_date":
                 break;
             default:
-                header("location: \\filemanager\public\\errorpage");
+                header("location: \\filemanager\public\\filestorage");
                 exit();
         }
 

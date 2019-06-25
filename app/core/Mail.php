@@ -4,17 +4,17 @@ use PHPMailer\PHPMailer;
 
 
 class Mail {
-    private static $omg=null;
+    private static $instance=null;
 
 
     private function __construct() {
     }
 
     public static function getMail() {
-        if (is_null(self::$omg)) {
-            self::$omg = new PHPMailer(true);
+        if (is_null(self::$instance)) {
+            self::$instance = new PHPMailer(true);
         }
-        return self::$omg;
+        return self::$instance;
     }
 
 

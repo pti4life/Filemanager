@@ -29,11 +29,14 @@ class EditorModel extends Model {
                                                                     VALUES(:filename,:filesize,:filetype,:userid,:senderid)');
             $stmt->execute(["filename" => $filename.".txt","filesize"=>$size,"filetype"=>$type ,"userid"=>$userid,"senderid"=>null]);
         } catch (PDOException $ex) {
-            echo $ex;
             return 2;
         }
         $id=$this->db->lastInsertId();
-        rename($path,"../app/files/".$this->USERNAME."/".$id.".txt");
+        $newpath="../app/files/".$this->USERNAME;
+        if (!file_exists($newpath)) {
+            mkdir($newpath);
+        }
+        rename($path,$newpath."/".$id.".txt");
         return 0;
 
 
@@ -51,14 +54,12 @@ class EditorModel extends Model {
             $stmt->execute(["username"=>$this->USERNAME,"fileid"=>explode(".",$id)[0]]);
             $result=$stmt->fetch(PDO::FETCH_ASSOC);
             $rowc=$stmt->rowCount();
-            echo "ROW: ".$rowc;
         } catch (PDOException $ex) {
             return 1;
         }
 
         if ($rowc==1) {
             $path="../app/files/".$this->USERNAME."/".$id;
-            echo "PATH:".$path;
             $data=file_get_contents($path);
             return ["content"=>$data,"filename"=>explode(".",$result["file_name"])[0]];
         } else {
@@ -75,7 +76,7 @@ class EditorModel extends Model {
             return 3;
         }
         $path="../app/files/".$this->USERNAME."/".$fnameid;
-        echo "PATH ".$path."<br/>";
+        //echo "PATH ".$path."<br/>";
         $size=filesize($path);
         $userid=$this->getId();
         try {
@@ -84,7 +85,7 @@ class EditorModel extends Model {
             file_put_contents($path,$newcontent);
             return 0;
         } catch (PDOException $ex) {
-            echo $ex;
+            //echo $ex;
             return 1;
         }
 
@@ -93,7 +94,6 @@ class EditorModel extends Model {
     private function getId() {
         $stmt = $this->db->prepare("SELECT user_id FROM users WHERE user_uname=:uname");
         $stmt->execute(["uname" =>$this->USERNAME ]);
-        //TODO: JAVÍTANI AZ ÖSSZES HELYEN A DUPLIKÁCIÓT
         $userid = $stmt->fetch(PDO::FETCH_ASSOC);
         return $userid["user_id"];
 

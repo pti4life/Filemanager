@@ -25,14 +25,14 @@ class UserOperations  {
     }
 
     public static function isValidUsername($username) {
-        if (preg_match('/[^0-9a-zA-Z\s]/',$username) or strlen(trim($username))<3) {
+        if (preg_match('/[^\p{L}0-9\p{L}a-z\p{L}A-Z\p{L}\s]/u',$username) or strlen(trim($username))<3) {
             return 0;
         }
         return 1;
     }
 
     public static function isValidName($name) {
-        if (preg_match('/[^a-zA-Z\s]/',$name) or strlen(trim($name))<3) {
+        if (preg_match('/[^\p{L}a-z\p{L}A-Z\p{L}\s]/u',$name) or strlen(trim($name))<3) {
             return 0;
         }
         return 1;

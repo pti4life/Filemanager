@@ -18,7 +18,6 @@ class SignUpModel extends Model {
                                                                     VALUES(:username,:password,:email,:user_name)');
                         $stmt->execute(["username" => $username, "password" => $password, "email"=>$email, "user_name"=>$name]);
                     } catch (PDOException $ex) {
-                        echo "PDO EX: ".$ex."<br/>";
                         array_push($errors, 7);
                         return $errors;
                     }

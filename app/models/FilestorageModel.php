@@ -25,7 +25,7 @@ class FilestorageModel extends Model {
             $stmt->execute(["filename" => $filename,"filesize"=>$filesize,"filetype"=>$type ,"userid"=>$uid,"senderid"=>$senderid]);
             $this->upload($filename,$path);
         } catch (PDOException $ex) {
-            echo $ex;
+            //echo $ex;
             return 1;
         }
 
@@ -121,9 +121,9 @@ class FilestorageModel extends Model {
         }
         foreach ($filenameids as $filenameid) {
             $path="../app/files/".$this->USERNAME."/".$filenameid;
-            echo "PATH: ".$path;
+            //echo "PATH: ".$path;
             if (!file_exists($path)) {
-                echo "nem létezik";
+                //echo "nem létezik";
                 return 1;
             }
         }
@@ -172,19 +172,23 @@ class FilestorageModel extends Model {
 
     }
     private function send_email($sendername,$sendtoemail,$sendtoname,$filenames) {
+        //it works with gmail
+        $EMAIL="companynorep@gmail.com";
+        $PASSWORD="p4ssvv0rd";
+        $COMPANYNAME='Company';
+
         $mail=Mail::getMail();
         try {
             $mail->isSMTP();
-            $mail->Host       = 'smtp.gmail.com';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = 'kallairolii@gmail.com';
-            $mail->Password   = '';
+            $mail->Host='smtp.gmail.com';
+            $mail->SMTPAuth=true;
+            $mail->Username=$EMAIL;
+            $mail->Password= $PASSWORD;
             $mail->SMTPSecure = 'tls';
             $mail->Port       = 587;
 
-            //Recipients
             $mail->CharSet = 'UTF-8';
-            $mail->setFrom('kallairolii@gmail.com', 'Company');
+            $mail->setFrom($EMAIL, $COMPANYNAME);
             $arr=explode(" ",$sendtoname);
             $mail->addAddress($sendtoemail, end($arr));     // Add a recipient
 

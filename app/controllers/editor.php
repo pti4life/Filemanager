@@ -8,7 +8,6 @@ class Editor extends Controller {
     function __construct() {
         Session::init();
         if(!Session::get("loggedin")) {
-            echo "nincs bejelentkezve";
             Session::destroy();
             header("location: \\filemanager\public\\errorpage");
             exit;
@@ -29,7 +28,6 @@ class Editor extends Controller {
         }
         $filename=$_POST["filename"];
         $content = $_POST["text"];
-        //echo "filename: ".$filename." content: ".$content."<br/>";
         $errormsg=$this->model->save_file($filename,$content);
         switch ($errormsg) {
             case 0:
@@ -57,7 +55,6 @@ class Editor extends Controller {
 
     public function edit($fnameid) {
         $msg=$this->model->edit_file($fnameid);
-        //echo "FILEID: ".$fnameid;
         if (is_array($msg)) {
             $GLOBALS["savebutt"]="update/".$fnameid;
             $GLOBALS["areacontent"]=$msg["content"];
@@ -88,7 +85,6 @@ class Editor extends Controller {
         $filename=$_POST["filename"];
         $content = $_POST["text"];
         $msg=$this->model->update_file($filenameid,$filename,$content);
-        //echo "message: ".$msg."<br/>";
         switch ($msg) {
             case 1:
                 $GLOBALS["savebutt"]="update/".$filenameid;

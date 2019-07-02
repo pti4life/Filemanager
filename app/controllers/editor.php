@@ -10,11 +10,9 @@ class Editor extends Controller {
         if(!Session::get("loggedin")) {
             Session::destroy();
             header("location: \\filemanager\public\\errorpage");
-            exit;
         }
 
         $this->setModel("editormodel");
-
     }
 
     public function index($param=[]) {
@@ -24,27 +22,27 @@ class Editor extends Controller {
     public function create() {
         if(!isset($_POST["savetext"])) {
             header("location:..\public\\filestorage");
-            exit;
         }
         $filename=$_POST["filename"];
         $content = $_POST["text"];
         $errormsg=$this->model->save_file($filename,$content);
+        var_dump($errormsg);
+        echo($errormsg);
         switch ($errormsg) {
-            case 0:
+            case "SUCCESS":
                 header("location:\\filemanager\public\\filestorage\index");
-                exit;
                 break;
-            case 1:
+            case "NOT_VALID_FNAME":
                 $GLOBALS["areacontent"]=$content;
                 $GLOBALS["filename"]=$filename;
                 call_user_func_array(["editor","index"],[["message"=>"A fájlnévben nem használhatóak speciális karakterek"]]);
                 break;
-            case 2:
+            case "DB_ERR":
                 $GLOBALS["areacontent"]=$content;
                 $GLOBALS["filename"]=$filename;
                 call_user_func_array(["editor","index"],[["message"=>"Sikertelen mentés!"]]);
                 break;
-            case 3:
+            case 'EMPTY_FNAME':
                 $GLOBALS["areacontent"]=$content;
                 $GLOBALS["filename"]=$filename;
                 call_user_func_array(["editor","index"],[["filename"=>$filename,"message"=>"A fájlnevet kötelező megadni!"]]);
@@ -64,13 +62,11 @@ class Editor extends Controller {
 
         } else {
             switch ($msg) {
-                case 1:
+                case "DB_ERR":
                     header("location:\\filemanager\public\\errorpage");
-                    exit;
                     break;
-                case 2:
+                case "USER_FILE_NOT_FOUND":
                     header("location:\\filemanager\public\\errorpage");
-                    exit;
                     break;
 
             }
@@ -86,7 +82,7 @@ class Editor extends Controller {
         $content = $_POST["text"];
         $msg=$this->model->update_file($filenameid,$filename,$content);
         switch ($msg) {
-            case 1:
+            case "DB_ERR":
                 $GLOBALS["savebutt"]="update/".$filenameid;
                 $GLOBALS["areacontent"]=$content;
                 $GLOBALS["filename"]=$filename;
@@ -94,15 +90,14 @@ class Editor extends Controller {
                 break;
             case 0:
                 header("location:\\filemanager\public\\filestorage");
-                exit;
                 break;
-            case 2:
+            case "NOT_VALID_FNAME":
                 $GLOBALS["savebutt"]="update/".$filenameid;
                 $GLOBALS["areacontent"]=$content;
                 $GLOBALS["filename"]=$filename;
                 call_user_func_array(["editor","index"],[["message"=>"Ne használjon speciális karaktereket kivéve: _"]]);
                 break;
-            case 3:
+            case "EMPTY_FILENAME":
                 $GLOBALS["savebutt"]="update/".$filenameid;
                 $GLOBALS["areacontent"]=$content;
                 $GLOBALS["filename"]=$filename;

@@ -1,9 +1,11 @@
 <?php
-class FilestorageModel extends Model {
+class FilestorageModel {
+
+    private $db;
 
     public function __construct() {
-        parent::__construct();
         $this->USERNAME=Session::get("user_name");
+        $this->db=Database::getDB();
     }
 
     private $LIMIT;
@@ -68,7 +70,7 @@ class FilestorageModel extends Model {
 
 
 
-    public function download_file($fnameid) {
+    public function select_file($fnameid) {
         //echo "id: ".$id;
         $stmt = $this->db->prepare("select file_name,file_type 
                                                 from users inner join files on users.user_id=files.user_id
@@ -80,16 +82,11 @@ class FilestorageModel extends Model {
         if ($rowc==1) {
             $file="../app/files/".$this->USERNAME."/".$fnameid;
             if (!file_exists($file)) {
-                return 2;
+                return "FILE_DOESNT_EXISTS";
             }
-            header('Content-Disposition: attachment; filename="'.$exsist["file_name"].'"');
-            header('Content-Description: File Transfer');
-            header('Content-Type:'.$exsist["file_type"]);
-            //header('Content-Transfer-Encoding: binary');
-            readfile($file);
-            exit;
+            return ["file"=>$file,"ftype"=>$exsist["file_type"],"fname"=>$exsist["file_name"]];
         } else {
-            return 1;
+            return "USER_FILE_NOT_FOUND";
         }
 
     }
@@ -106,25 +103,25 @@ class FilestorageModel extends Model {
             $dirname="../app/files/".$this->USERNAME."/";
             if ($this->is_dir_empty($dirname)) {
                 rmdir($dirname);
-                return 0;
+                return "SUCCESS";
             }
         } else {
             //we can display errorpage
-            return 1;
+            return "DB_ERR";
         }
     }
 
 
     public function send_files($filenameids,$tousername) {
         if (empty($filenameids)) {
-            return 3;
+            return "EMPTY_ARRAY";
         }
         foreach ($filenameids as $filenameid) {
             $path="../app/files/".$this->USERNAME."/".$filenameid;
             //echo "PATH: ".$path;
             if (!file_exists($path)) {
                 //echo "nem létezik";
-                return 1;
+                return "FILE_NOT_FOUND";
             }
         }
 
@@ -134,7 +131,7 @@ class FilestorageModel extends Model {
         $sendtouser = $stmt->fetch(PDO::FETCH_ASSOC);
         $rowc=$stmt->rowCount();
         if ($rowc!=1) {
-            return 2;
+            return "USER_NOT_FOUND";
         }
 
         $stmt = $this->db->prepare('INSERT INTO files (file_name,file_size,file_type,user_id,sender_id)
@@ -162,52 +159,23 @@ class FilestorageModel extends Model {
             count($fnamearr)==1?$fnameid=$newid:$fnameid=$newid.".".end($fnamearr);
             copy($path,$newpath."/".$fnameid);
         }
-
-        $errmsg=$this->send_email($this->USERNAME,$sendtouser["user_email"],$sendtouser["user_name"],$filenames);
+        return ["username"=>$this->USERNAME,"sendtouseremail"=>$sendtouser["user_email"],"sendtousername"=>$sendtouser["user_name"],"filenames"=>$filenames];
+        
         if ($errmsg!=0) {
             return 4;
         }
 
-        return 0;
+        
 
     }
-    private function send_email($sendername,$sendtoemail,$sendtoname,$filenames) {
-        //it works with gmail
-        $EMAIL="companynorep@gmail.com";
-        $PASSWORD="p4ssvv0rd";
-        $COMPANYNAME='Company';
-
-        $mail=Mail::getMail();
-        try {
-            $mail->isSMTP();
-            $mail->Host='smtp.gmail.com';
-            $mail->SMTPAuth=true;
-            $mail->Username=$EMAIL;
-            $mail->Password= $PASSWORD;
-            $mail->SMTPSecure = 'tls';
-            $mail->Port       = 587;
-
-            $mail->CharSet = 'UTF-8';
-            $mail->setFrom($EMAIL, $COMPANYNAME);
-            $arr=explode(" ",$sendtoname);
-            $mail->addAddress($sendtoemail, end($arr));     // Add a recipient
-
-            $mail->Subject = 'Új fájlja van';
-            $mail->Body    = 'Kedves, '.$sendtoname."!\n Új fájl(jai) vannak:".$filenames."\nKüldte: ".$sendername;
-
-            $mail->send();
-            return 0;
-        } catch (Exception $e) {
-            return 1;
-        }
-    }
+    
 
 
     public function calculate_pages($word="") {
         $word="%".strtolower($word)."%";
         $stmt = $this->db->prepare("select *
-                                                from users inner join files on users.user_id=files.user_id
-                                                where user_uname=:username and LOWER(file_name) like :fname");
+                                            from users inner join files on users.user_id=files.user_id
+                                            where user_uname=:username and LOWER(file_name) like :fname");
         $stmt->execute(["username"=>$this->USERNAME,"fname"=>$word]);
         $count=$stmt->rowCount();
         return $this->pages_number($this->LIMIT,$count);

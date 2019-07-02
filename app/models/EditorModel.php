@@ -1,23 +1,22 @@
 <?php
 
-class EditorModel extends Model {
+class EditorModel {
 
     private $USERNAME;
+    private $db;
 
     public function __construct() {
-
-        parent::__construct();
         $this->USERNAME=Session::get("user_name");
-
+        $this->db=Database::getDB();
     }
 
     public function save_file($filename,$content) {
         if (preg_match('/[%?^#&!~ˇ˘°˛˙´˙`˛°˘]/',$filename)) {
-            return 1;
+            return "NOT_VALID_FNAME";
         }
 
         if (strlen(trim($filename))==0) {
-            return 3;
+            return "EMPTY_FNAME";
         }
         $path="../app/files/temp/file";
         file_put_contents($path,$content);
@@ -29,7 +28,7 @@ class EditorModel extends Model {
                                                                     VALUES(:filename,:filesize,:filetype,:userid,:senderid)');
             $stmt->execute(["filename" => $filename.".txt","filesize"=>$size,"filetype"=>$type ,"userid"=>$userid,"senderid"=>null]);
         } catch (PDOException $ex) {
-            return 2;
+            return "DB_ERR";
         }
         $id=$this->db->lastInsertId();
         $newpath="../app/files/".$this->USERNAME;
@@ -37,7 +36,7 @@ class EditorModel extends Model {
             mkdir($newpath);
         }
         rename($path,$newpath."/".$id.".txt");
-        return 0;
+        return "SUCCESS";
 
 
 
@@ -55,7 +54,7 @@ class EditorModel extends Model {
             $result=$stmt->fetch(PDO::FETCH_ASSOC);
             $rowc=$stmt->rowCount();
         } catch (PDOException $ex) {
-            return 1;
+            return "DB_ERR";
         }
 
         if ($rowc==1) {
@@ -63,17 +62,17 @@ class EditorModel extends Model {
             $data=file_get_contents($path);
             return ["content"=>$data,"filename"=>explode(".",$result["file_name"])[0]];
         } else {
-            return 2;
+            return "USER_FILE_NOT_FOUND";
         }
 
     }
 
     public function update_file($fnameid,$newname,$newcontent) {
         if (preg_match('/[%?^#&!~ˇ˘°˛˙´˙`˛°˘]/',$newname)) {
-            return 2;
+            return "NOT_VALID_FNAME";
         }
         if (strlen(trim($fnameid))==0) {
-            return 3;
+            return "EMPTY_FILENAME";
         }
         $path="../app/files/".$this->USERNAME."/".$fnameid;
         //echo "PATH ".$path."<br/>";
@@ -86,7 +85,7 @@ class EditorModel extends Model {
             return 0;
         } catch (PDOException $ex) {
             //echo $ex;
-            return 1;
+            return "DB_ERR";
         }
 
     }

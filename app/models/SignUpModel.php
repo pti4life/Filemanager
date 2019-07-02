@@ -1,9 +1,11 @@
 <?php
 
-class SignUpModel extends Model {
+class SignUpModel {
+
+    private $db;
 
     public function __construct() {
-        parent::__construct();
+        $this->db=Database::getDB();
     }
 
 

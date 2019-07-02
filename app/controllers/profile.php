@@ -15,7 +15,7 @@ class Profile extends Controller {
     }
 
     public function index($param=[]) {
-        $defaultArr=$this->model->selectUser();
+        $defaultArr=$this->model->select_user();
         $array=array_merge($defaultArr,(array)$param);
         $this->view("profileView",$array);
     }
@@ -32,15 +32,15 @@ class Profile extends Controller {
             return;
         }
 
-        $msg=$this->model->updateUsername($newusername);
+        $msg=$this->model->update_username($newusername);
         switch ($msg) {
-            case 0:
+            case "SUCCESS":
                 call_user_func_array(["profile","index"],[["message"=>"Sikeres felhasználónév változtatás."]]);
                 break;
-            case 1:
+            case "USERNAME_EXISTS":
                 call_user_func_array(["profile","index"],[["message"=>"Az új felhasználónév már létezik!"]]);
                 break;
-            case 2:
+            case "INVALID_USERNAME":
                 call_user_func_array(["profile","index"],[["message"=>"A felhasználónév túl rövid vagy speciális karaktereket tartalmaz)!"]]);
                 break;
         }
@@ -59,15 +59,15 @@ class Profile extends Controller {
             call_user_func_array(["profile","index"],[["message"=>"Minden mezőt ki kell tölteni."]]);
         }
 
-        $msg=$this->model->updatePassword($_POST["oldpassword"],$_POST["newpassword"]);
+        $msg=$this->model->update_password($_POST["oldpassword"],$_POST["newpassword"]);
         switch ($msg) {
-            case 0:
+            case "SUCCESS":
                 call_user_func_array(["profile","index"],[["message"=>"Sikeres a jelszó változtatás."]]);
                 break;
-            case 1:
+            case "INVALID_NEW_PASSWORD":
                 call_user_func_array(["profile","index"],[["message"=>"Az új jelszó nem megfelelő"]]);
                 break;
-            case 2:
+            case "INVALID_PASSWORD":
                 call_user_func_array(["profile","index"],[["message"=>"Nem megfelően írta be a jelszavát."]]);
                 break;
         }

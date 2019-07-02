@@ -14,7 +14,6 @@ class FileStorage extends Controller {
         if(!Session::get("loggedin")) {
             Session::destroy();
             header("location: \\filemanager\public\\errorpage");
-            exit();
         }
         $this->setModel("filestoragemodel");
         $this->model->setLimit($this->LIMIT);
@@ -23,7 +22,6 @@ class FileStorage extends Controller {
     public function index($param=[]) {
         if(!is_array($param)) {
             header("location: \\filemanager\public\\filestorage");
-            exit();
         }
         $GLOBALS["files"]=$this->model->file_list();
         $GLOBALS["pagenumber"]=$this->model->calculate_pages();
@@ -36,14 +34,12 @@ class FileStorage extends Controller {
     public function logout() {
         Session::destroy();
         header("location:..\login");
-        exit;
     }
 
 
     public function uploadFile() {
         if (!isset($_POST["uploadfile"])) {
             header("location: \\filemanager\public\\errorpage");
-            exit();
         }
         $name=$_FILES["file"]["name"];
         if (empty($name)) {
@@ -82,26 +78,30 @@ class FileStorage extends Controller {
     public function downloadFile($fnameid) {
         if (strlen($fnameid)==0) {
             header("location: \\filemanager\public\\errorpage");
-            exit();
         }
-        $downErr=$this->model->download_file($fnameid);
-        switch ($downErr) {
-            case 1:
+        $msg=$this->model->select_file($fnameid);
+        switch ($msg) {
+            case "USER_FILE_NOT_FOUND":
                 call_user_func_array(["filestorage","index"],[["message"=>"Sikertelen letöltés!"]]);
                 break;
-            case 2:
+            case "FILE_DOESNT_EXISTS":
                 call_user_func_array(["filestorage","index"],[["message"=>"A fájl nem található!"]]);
                 break;
+            default:
+                header('Content-Disposition: attachment; filename="'.$msg["fname"].'"');
+                header('Content-Description: File Transfer');
+                header('Content-Type:'.$msg["ftype"]);
+                readfile($msg["file"]);
         }
     }
 
     public function deleteFile($param) {
         $errmsg=$this->model->delete_file($param);
         switch ($errmsg) {
-            case 0:
+            case "SUCCESS":
                 call_user_func_array(["filestorage","index"],[["message"=>"Sikeres törlés!"]]);
                 break;
-            case 1:
+            case "DB_ERR":
                 call_user_func_array(["filestorage","index"],[["message"=>"Sikertelen törlés!"]]);
                 break;
         }
@@ -115,7 +115,6 @@ class FileStorage extends Controller {
 
         if ((strcmp($order,"ASC")!=0 and strcmp($order,"DESC")!=0) or !is_numeric($pagenum) ) {
             header("location: \\filemanager\public\\filestorage");
-            exit();
         }
 
         switch ($column) {
@@ -127,7 +126,6 @@ class FileStorage extends Controller {
                 break;
             default:
                 header("location: \\filemanager\public\\filestorage");
-                exit();
         }
 
         strcmp($order,"ASC")==0?$GLOBALS["sorting"]="DESC/0":$GLOBALS["sorting"]="ASC/0";
@@ -150,32 +148,72 @@ class FileStorage extends Controller {
             return;
         }
         if (!isset($_POST["filename"]))  {
-            call_user_func_array(["filestorage","index"],[["message"=>"Legalább 1 fájlt küldeni kell!"]]);
+            call_user_func_array(["filestorage","index"],[["message"=>"Küldésre szükséges legalább 1 fájlt kijelölni!"]]);
             return;
         }
         if (!isset($sendto)) {
             call_user_func_array(["filestorage","index"],[["message"=>"Adja meg, hogy kinek szeretne küldeni"]]);
             return;
         }
+
         $filearray=$_POST["filename"];
 
-        $errormsg=$this->model->send_files($filearray,$sendto);
-        switch ($errormsg) {
-            case 1:
+        $msg=$this->model->send_files($filearray,$sendto);
+        if(is_array($msg)) {
+            print_r($msg);
+            $errmsg=$this->send_email($msg["username"],$msg["sendtouseremail"],$msg["sendtousername"],$msg["filenames"]);
+            switch($errmsg) {
+                case 0:
+                    call_user_func_array(["filestorage","index"],[["message"=>"Sikeres küldés!"]]);
+                    break;
+                case 1:
+                    call_user_func_array(["filestorage","index"],[["message"=>"Az email értesítést nem sikerült elküldeni!"]]);
+                    break;
+            }
+        }
+        switch ($msg) {
+            case "FILE_NOT_FOUND":
                 call_user_func_array(["filestorage","index"],[["message"=>"A küldés sikertelen, a fájl(ok) nem találhatóak"]]);
                 break;
-            case 2:
+            case "USER_NOT_FOUND":
                 call_user_func_array(["filestorage","index"],[["message"=>"A kiválasztott felhasználó nem található"]]);
                 break;
-            case 0:
-                call_user_func_array(["filestorage","index"],[["message"=>"Sikeres küldés!"]]);
+            case "EMPTY_ARRAY":
+                call_user_func_array(["filestorage","index"],[[]]);
                 break;
-            case 4:
-                call_user_func_array(["filestorage","index"],[["message"=>"Sikertelen email küldés!"]]);
-                break;
-            case 3:
-                call_user_func_array(["filestorage","index"],[["message"=>"Legalább 1 fájlt küldjön!"]]);
-                break;
+        }
+    }
+
+    private function send_email($sendername,$sendtoemail,$sendtoname,$filenames) {
+        echo($sendername." mail: ".$sendtoemail." toname: ".$sendtoname." filenames:");
+        print_r($filenames);
+        $EMAIL="companynorep@gmail.com";
+        $PASSWORD="p4ssvv0rd";
+        $COMPANYNAME='Company';
+
+        $mail=Mail::getMail();
+        try {
+            $mail->isSMTP();
+            $mail->Host='smtp.gmail.com';
+            $mail->SMTPAuth=true;
+            $mail->Username=$EMAIL;
+            $mail->Password= $PASSWORD;
+            $mail->SMTPSecure = 'tls';
+            $mail->Port       = 587;
+
+            $mail->CharSet = 'UTF-8';
+            $mail->setFrom($EMAIL, $COMPANYNAME);
+            $arr=explode(" ",$sendtoname);
+            $mail->addAddress($sendtoemail, end($arr));     // Add a recipient
+
+            $mail->Subject = 'Új fájlja van';
+            $mail->Body    = 'Kedves, '.$sendtoname."!\n Új fájl(jai) vannak:".$filenames."\nKüldte: ".$sendername;
+
+            $mail->send();
+            return 0;
+        } catch (Exception $e) {
+            echo $e;
+            return 1;
         }
     }
 

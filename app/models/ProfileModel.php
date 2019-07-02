@@ -1,15 +1,17 @@
 <?php
 
-class ProfileModel extends Model {
+class ProfileModel {
+
+    private $db;
 
     public function __construct() {
-        parent::__construct();
         Session::init();
+        $this->db=Database::getDB();
 
     }
 
 
-    public function selectUSer() {
+    public function select_user() {
 
         $user=Session::get("user_name");
         $stmt=$this->db->prepare("SELECT user_name,user_uname,user_email FROM users WHERE user_uname=:username");
@@ -18,33 +20,33 @@ class ProfileModel extends Model {
         return $select;
     }
 
-    public function updateUsername($newusername) {
+    public function update_username($newusername) {
         if(UserOperations::checkUser($newusername)) {
-            return 1;
+            return "USERNAME_EXISTS";
         }
         $oldusername=$user=Session::get("user_name");
         if (UserOperations::isValidUsername($newusername)) {
             $stmt=$this->db->prepare("UPDATE users SET user_uname=:newusername  WHERE user_uname=:username");
             $stmt->execute(["username"=>$oldusername,"newusername"=>$newusername]);
             Session::set("user_name",$newusername);
-            return 0;
+            return "SUCCESS";
         } else {
-            return 2;
+            return "INVALID_USERNAME";
         }
     }
 
 
-    public function updatePassword($oldpassword,$newpassword) {
+    public function update_password($oldpassword,$newpassword) {
         if (UserOperations::isValidPassword($newpassword)) {
             $username=Session::get("user_name");
             if (UserOperations::authUser($username,$oldpassword)==0) {
                 $newpassword=password_hash($newpassword, PASSWORD_BCRYPT);
                 $stmt=$this->db->prepare("UPDATE users SET user_password=:newpassword  WHERE user_uname=:username");
                 $stmt->execute(["newpassword"=>$newpassword,"username"=>$username]);
-                return 0;
+                return "SUCCESS";
 
             } else {
-                return 2;
+                return "INVALID_PASSWORD";
             }
         } else {
             return 1;

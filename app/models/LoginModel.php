@@ -1,11 +1,12 @@
 <?php
 
-class Loginmodel extends Model {
+class Loginmodel {
+
+    private $db;
 
 
     public function __construct() {
-
-        parent::__construct();
+        $this->db=Database::getDB();
 
     }
 
